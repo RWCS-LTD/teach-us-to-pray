@@ -93,21 +93,15 @@ textarea {
 }
 
 textarea.short { min-height: 5.5rem; }
-.cues { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin: .75rem 0; color: var(--muted); font-size: .95rem; }
-.chip { min-height: 2.75rem; padding: .3rem .95rem; font: inherit; color: var(--accent); background: var(--surface); border: 1px solid var(--accent); border-radius: 2rem; cursor: pointer; }
+.cues { margin: .75rem 0; color: var(--muted); font-size: .95rem; }
+.cues p { margin: 0 0 .25rem; }
+.cues ul { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: 0; padding: 0; list-style: none; }
+.cues li { color: var(--text); }
+.lead { font-size: 1.15rem; font-weight: 600; line-height: 1.45; }
 h2.small { margin: .9rem 0 .4rem; font-size: .9rem; }
 .ask .verse { margin-bottom: .5rem; }
 .ask .hint { margin: .6rem 0 0; }
 .ask + .hint { margin-top: .6rem; }
-.say { margin-top: 1.25rem; font-weight: 600; }
-button.link { background: none; border: 0; padding: .6rem 0; min-height: 2.75rem; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; text-align: left; }
-
-/* Choosing how to pray */
-.choices { display: grid; gap: .6rem; margin: .5rem 0 1.25rem; }
-@media (min-width: 34rem) { .choices { grid-template-columns: 1fr 1fr; } }
-.btn.choice { flex-direction: column; align-items: flex-start; gap: .15rem; padding: .85rem 1.1rem; text-align: left; }
-.btn.choice strong { font-size: 1.15rem; }
-.btn.choice span { font-weight: 400; }
 
 /* Buttons */
 .actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.25rem 0; }

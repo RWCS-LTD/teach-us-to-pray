@@ -15,10 +15,11 @@
   let L;            // language strings
   let S;            // scripture document
   let answers = []; // the person's own words, one entry per step
-  let parts = [];   // guided mode: the words typed under each short question, per step
-  let mode = 'guided'; // 'guided' (short questions) or 'open' (one box per step)
+  let parts = [];   // the words typed under each short question, per step
   let keep = false; // "keep my draft on this device"
   let flash = '';   // one-time status message for the next render
+  let prayerDay = null;     // the day fixed when the person taps Begin (memory only)
+  const edited = new Set(); // steps changed on the read-through screen this visit
 
   const main = document.getElementById('main');
 
@@ -44,10 +45,42 @@
     return L.books[book] + ' ' + first + (group.length > 1 ? '-' + last : '');
   }
 
+  // An excerpt can begin or end partway through a speech. An unmatched quotation mark at
+  // the very start or very end of the excerpt is not shown. An unmatched opening mark
+  // further in (after "said,") stays, so the reader sees where the speaker begins.
+  // Only marks are removed, never words. A single mark goes only when it is unmatched
+  // and touches a removed double mark, because the closing single mark is also the
+  // apostrophe. tools/verify.py applies the same rule and checks every excerpt.
+  function trimQuotes(t) {
+    const letter = (c) => /\p{L}/u.test(c || '');
+    const strayDouble = new Set();
+    const straySingle = new Set();
+    const openD = [];
+    const openS = [];
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (c === '“') openD.push(i);
+      else if (c === '”') { if (openD.length) openD.pop(); else strayDouble.add(i); }
+      else if (c === '‘') openS.push(i);
+      else if (c === '’' && !(letter(t[i - 1]) && letter(t[i + 1]))) {
+        if (openS.length) openS.pop(); else straySingle.add(i);
+      }
+    }
+    openD.forEach((i) => strayDouble.add(i));
+    openS.forEach((i) => straySingle.add(i));
+    const atEdge = (i) => i === 0 || i === t.length - 1;
+    const drop = new Set([...strayDouble].filter(atEdge));
+    for (const i of [...drop]) {
+      if (t[i] === '“' && straySingle.has(i + 1)) drop.add(i + 1);
+      if (t[i] === '”' && straySingle.has(i - 1)) drop.add(i - 1);
+    }
+    return t.split('').filter((_, i) => !drop.has(i)).join('');
+  }
+
   // A passage of Scripture with its reference. The text comes only from the Scripture file.
   function passage(group, extraClass) {
     return h('figure', { class: 'verse' + (extraClass ? ' ' + extraClass : '') },
-      h('blockquote', null, h('p', null, group.map((r) => S.verses[r]).join(' '))),
+      h('blockquote', null, h('p', null, trimQuotes(group.map((r) => S.verses[r]).join(' ')))),
       h('figcaption', null, refLabel(group) + ' · ' + S.abbreviation));
   }
 
@@ -59,18 +92,17 @@
   function loadDraft() {
     try {
       let saved = JSON.parse(localStorage.getItem(DRAFT_KEY));
-      if (Array.isArray(saved)) saved = { answers: saved, mode: 'open' }; // first version stored a plain list
+      if (Array.isArray(saved)) saved = { answers: saved }; // first version stored a plain list
       if (!saved || !Array.isArray(saved.answers)) return;
       const text = (v) => (typeof v === 'string' ? v : '');
       answers = answers.map((_, i) => text(saved.answers[i]));
       parts = parts.map((list, i) => list.map((_, k) => text(((saved.parts || [])[i] || [])[k])));
-      mode = saved.mode === 'open' ? 'open' : 'guided';
       keep = true;
     } catch (e) { /* storage unavailable: carry on without it */ }
   }
   function saveDraft() {
     if (!keep) return;
-    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ mode, answers, parts })); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, parts })); } catch (e) { /* ignore */ }
   }
   function forgetDraft() {
     try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
@@ -87,6 +119,7 @@
         if (!window.confirm(L.draft.eraseConfirm)) return;
         answers = answers.map(() => '');
         parts = parts.map((list) => list.map(() => ''));
+        edited.clear();
         forgetDraft();
         saveDraft();
         flash = L.draft.erased;
@@ -111,22 +144,18 @@
         h('h1', null, L.welcome.heading),
         L.welcome.verses.map((r) => passage([r])),
         paragraphs(L.welcome.body),
-        h('h2', null, L.mode.heading),
-        h('div', { class: 'choices' },
-          modeChoice('guided', '#/guide', L.mode.guided, L.mode.guidedHint, 'primary'),
-          modeChoice('open', '#/step/1', L.mode.open, L.mode.openHint, '')),
+        h('div', { class: 'actions' }, beginLink('#/guide', L.welcome.begin)),
         h('p', null, h('a', { href: '#/why' }, L.welcome.whyLink)),
         draftSection(),
       ],
     };
   }
 
-  // A large button on the welcome screen that picks how to pray and starts.
-  function modeChoice(value, href, label, hint, extraClass) {
-    return h('a', {
-      class: 'btn choice ' + extraClass, href,
-      onclick: () => { mode = value; saveDraft(); },
-    }, h('strong', null, label), h('span', null, hint));
+  // A Begin button. Tapping it fixes "today" for this prayer, so the passages
+  // offered do not change if the prayer runs past midnight.
+  const today = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+  function beginLink(href, label) {
+    return h('a', { class: 'btn primary grow', href, onclick: () => { prayerDay = today(); } }, label);
   }
 
   function whyView() {
@@ -137,85 +166,31 @@
         L.why.sections.map((s) => [h('h2', null, s.heading), passage(s.verses)]),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: '#/' }, L.nav.back),
-          h('a', { class: 'btn primary grow', href: '#/step/1' }, L.nav.start)),
+          h('a', { class: 'btn primary grow', href: '#/guide' }, L.nav.start)),
       ],
     };
   }
 
   // Which entries of a step's pool to show today. Chosen from the date alone,
-  // so nothing about the person needs to be stored.
+  // so nothing about the person needs to be stored. The day is the one fixed at
+  // Begin, or today if a step was opened directly.
   function todaysPassages(pool) {
     const perDay = Math.min(L.step.perDay, pool.length);
     if (!perDay) return [[], []];
-    const day = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+    const day = prayerDay == null ? today() : prayerDay;
     const start = (day * perDay) % pool.length;
-    const today = [];
+    const picks = [];
     const rest = [];
-    pool.forEach((g, j) => (((j - start + pool.length) % pool.length) < perDay ? today : rest).push(g));
-    return [today, rest];
+    pool.forEach((g, j) => (((j - start + pool.length) % pool.length) < perDay ? picks : rest).push(g));
+    return [picks, rest];
   }
 
   const progressText = (n) => L.step.progress.replace('{n}', n).replace('{total}', L.steps.length);
   const dots = (i) => h('ol', { class: 'dots', 'aria-hidden': 'true' },
     L.steps.map((_, j) => h('li', { class: j <= i ? 'done' : '' })));
-  // Guided mode keeps the words of each short question; a step's words are those joined together.
-  const joined = (i) => parts[i].filter((t) => t.trim()).join('\n');
-
-  // A link that changes how the questions are asked, staying on the same step.
-  function switchLink(toMode, label, i) {
-    return h('button', {
-      type: 'button', class: 'link',
-      onclick: () => {
-        mode = toMode;
-        saveDraft();
-        const target = '#/step/' + (i + 1);
-        if (location.hash === target) render(true); else location.hash = target;
-      },
-    }, label);
-  }
-
-  // "On my own": one question and one box for the step.
-  function stepView(i) {
-    const step = L.steps[i];
-    const n = i + 1;
-    const total = L.steps.length;
-    const progress = progressText(n);
-    const [today, rest] = todaysPassages(step.related);
-
-    const nextLabel = () => (n === total ? L.nav.finish : answers[i].trim() ? L.nav.next : L.nav.skip);
-    const next = h('a', { class: 'btn primary grow', href: n < total ? '#/step/' + (n + 1) : '#/prayer' }, nextLabel());
-
-    // The box always starts with the person's own words or nothing at all.
-    // Spell-check is off so that no browser service is sent what is typed.
-    const box = h('textarea', {
-      id: 'words', rows: '6', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'words-hint',
-      oninput: (e) => { answers[i] = e.target.value; next.textContent = nextLabel(); saveDraft(); },
-    });
-    box.value = answers[i];
-
-    return {
-      title: progress + ': ' + step.name,
-      nodes: [
-        h('p', { class: 'progress' }, progress),
-        dots(i),
-        h('h1', null, step.name),
-        h('h2', null, L.step.jesusWords),
-        step.verses.map((g) => passage(g, 'main')),
-        step.note && h('p', { class: 'note' }, h('strong', null, L.app.ourNoteLabel + ': '), step.note),
-        today.length > 0 && [h('h2', null, L.step.relatedHeading), today.map((g) => passage(g))],
-        rest.length > 0 && h('details', null, h('summary', null, L.step.moreLink), rest.map((g) => passage(g))),
-        h('div', { class: 'ask' },
-          h('label', { for: 'words' }, step.prompt),
-          h('p', { class: 'hint', id: 'words-hint' }, L.step.inputHint),
-          box),
-        h('p', { class: 'say' }, L.step.sayAloud),
-        step.guided && switchLink('guided', L.mode.toGuided, i),
-        h('div', { class: 'actions' },
-          h('a', { class: 'btn', href: n > 1 ? '#/step/' + (n - 1) : '#/' }, L.nav.back),
-          next),
-      ],
-    };
-  }
+  // Each step keeps the words of its short questions; the step's words are those
+  // joined with a space, so the step reads as one paragraph. Nothing is added to them.
+  const joined = (i) => parts[i].filter((t) => t.trim()).join(' ');
 
   // "Guide me": a short start screen with the words of Jesus about praying simply.
   function guideIntroView() {
@@ -228,7 +203,7 @@
         paragraphs(g.intro),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: '#/' }, L.nav.back),
-          h('a', { class: 'btn primary grow', href: '#/step/1/1' }, g.begin)),
+          beginLink('#/step/1/1', g.begin)),
       ],
     };
   }
@@ -243,36 +218,30 @@
     const progress = progressText(n) + (count > 1 ? g.questionOf.replace('{k}', k + 1).replace('{count}', count) : '');
     const last = n === L.steps.length && k === count - 1;
 
-    // If the words were changed in the single box, keep them all: put them under the first question.
+    // If the words were changed on the read-through screen, keep them all: put them under the first question.
     if (joined(i) !== answers[i]) parts[i] = parts[i].map((_, q) => (q ? '' : answers[i]));
+    const editedNote = edited.has(i) && count > 1 && h('p', { class: 'note' }, k ? g.editedFirst : g.editedHere);
 
-    const nextHref = k + 1 < count ? '#/step/' + n + '/' + (k + 2) : last ? '#/pray/1' : '#/step/' + (n + 1) + '/1';
+    const nextHref = k + 1 < count ? '#/step/' + n + '/' + (k + 2) : last ? '#/review' : '#/step/' + (n + 1) + '/1';
     const backHref = k > 0 ? '#/step/' + n + '/' + k
       : i > 0 ? '#/step/' + i + '/' + L.steps[i - 1].guided.length : '#/guide';
-    const nextLabel = () => (last ? g.toAloud : parts[i][k].trim() ? L.nav.next : L.nav.skipQuestion);
+    const nextLabel = () => (last ? g.toReview : parts[i][k].trim() ? L.nav.next : L.nav.skipQuestion);
     const next = h('a', { class: 'btn primary grow', href: nextHref }, nextLabel());
 
     // The box always starts with the person's own words or nothing at all.
     // Spell-check is off so that no browser service is sent what is typed.
-    const update = () => { parts[i][k] = box.value; answers[i] = joined(i); next.textContent = nextLabel(); saveDraft(); };
+    const update = () => { parts[i][k] = box.value; answers[i] = joined(i); edited.delete(i); next.textContent = nextLabel(); saveDraft(); };
     const box = h('textarea', {
       id: 'words', class: 'short', rows: '4', autocomplete: 'off', spellcheck: 'false',
       'aria-describedby': 'words-hint', oninput: update,
     });
     box.value = parts[i][k];
 
-    // Tapping a "Think about" word adds that word to the box. It never adds a sentence.
-    const cues = item.cues && h('div', { class: 'cues', role: 'group', 'aria-labelledby': 'cues-label' },
-      h('span', { id: 'cues-label' }, L.step.cuesLabel + ':'),
-      item.cues.map((cue) => h('button', {
-        type: 'button', class: 'chip',
-        onclick: () => {
-          const v = box.value;
-          box.value = v + (v && !/\s$/.test(v) ? ', ' : '') + cue;
-          update();
-          box.focus();
-        },
-      }, cue)));
+    // "Think about" prompts are for reflection only. Nothing is ever put in the box for the person.
+    const cues = item.cues && h('div', { class: 'cues' },
+      h('p', { id: 'cues-label' }, L.step.cuesLabel + ':'),
+      h('ul', { 'aria-labelledby': 'cues-label' }, item.cues.map((cue) => h('li', null, cue))));
+    const [picks, rest] = todaysPassages(step.related);
 
     return {
       title: progress + ': ' + step.name,
@@ -286,13 +255,42 @@
           h('label', { for: 'words' }, item.q),
           item.example && [h('h2', { class: 'small' }, g.exampleHeading), passage(item.example)],
           cues,
+          editedNote,
           box,
-          h('p', { class: 'hint', id: 'words-hint' }, item.cues ? g.hintCues : g.hint)),
+          h('p', { class: 'hint', id: 'words-hint' }, g.hint)),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: backHref }, L.nav.back),
           next),
-        h('details', null, h('summary', null, L.step.moreLink), step.related.map((v) => passage(v))),
-        switchLink('open', L.mode.toOpen, i),
+        picks.length > 0 && h('details', null, h('summary', null, L.step.relatedHeading), picks.map((v) => passage(v))),
+        rest.length > 0 && h('details', null, h('summary', null, L.step.moreLink), rest.map((v) => passage(v))),
+      ],
+    };
+  }
+
+  // The whole prayer in one place, one box per step, to read through and make one's own before praying it.
+  function reviewView() {
+    const g = L.guide;
+    const filled = L.steps.map((st, i) => ({ st, i })).filter(({ i }) => answers[i].trim());
+    if (!filled.length) return prayerView();
+    const lastStep = L.steps.length;
+    return {
+      title: g.reviewHeading,
+      nodes: [
+        h('h1', null, g.reviewHeading),
+        h('p', { class: 'lead', id: 'review-hint' }, g.reviewHint),
+        filled.map(({ st, i }) => {
+          const id = 'review-' + (i + 1);
+          // Spell-check is off so that no browser service is sent what is typed.
+          const box = h('textarea', {
+            id, rows: '4', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'review-hint',
+            oninput: (e) => { answers[i] = e.target.value; edited.add(i); saveDraft(); },
+          });
+          box.value = answers[i];
+          return h('div', { class: 'ask' }, h('label', { for: id }, st.name), box);
+        }),
+        h('div', { class: 'actions' },
+          h('a', { class: 'btn', href: '#/step/' + lastStep + '/' + L.steps[lastStep - 1].guided.length }, L.nav.back),
+          h('a', { class: 'btn primary grow', href: '#/pray/1' }, g.toAloud)),
       ],
     };
   }
@@ -312,7 +310,7 @@
         h('h1', null, g.sayThis),
         h('div', { class: 'aloud' }, h('p', null, said[idx].text)),
         h('div', { class: 'actions' },
-          h('a', { class: 'btn', href: idx > 0 ? '#/pray/' + idx : '#/step/' + L.steps.length }, L.nav.back),
+          h('a', { class: 'btn', href: idx > 0 ? '#/pray/' + idx : '#/review' }, L.nav.back),
           h('a', { class: 'btn primary grow', href: lastPart ? '#/prayer' : '#/pray/' + (idx + 2) },
             lastPart ? g.finish : L.nav.next)),
       ],
@@ -349,7 +347,7 @@
     const nodes = [h('h1', null, L.prayer.heading)];
     if (!parts.length) {
       nodes.push(h('p', null, L.prayer.empty),
-        h('div', { class: 'actions' }, h('a', { class: 'btn primary', href: '#/step/1' }, L.prayer.edit)));
+        h('div', { class: 'actions' }, h('a', { class: 'btn primary', href: '#/guide' }, L.guide.begin)));
     } else {
       const status = h('p', { class: 'status', role: 'status' });
       nodes.push(
@@ -372,7 +370,7 @@
           }, L.prayer.save),
           h('button', { type: 'button', class: 'btn', onclick: () => window.print() }, L.prayer.print),
           h('a', { class: 'btn', href: '#/aloud' }, L.prayer.aloud),
-          h('a', { class: 'btn', href: '#/step/1' }, L.prayer.edit)),
+          h('a', { class: 'btn', href: '#/review' }, L.prayer.edit)),
         status);
     }
     nodes.push(draftSection());
@@ -417,12 +415,11 @@
     const stepIndex = parseInt(arg, 10) - 1;
     let view;
     if (name === 'step' && L.steps[stepIndex]) {
-      const questions = mode === 'guided' && L.steps[stepIndex].guided;
-      view = questions
-        ? guideView(stepIndex, Math.min(Math.max(parseInt(arg2, 10) || 1, 1), questions.length) - 1)
-        : stepView(stepIndex);
+      const count = L.steps[stepIndex].guided.length;
+      view = guideView(stepIndex, Math.min(Math.max(parseInt(arg2, 10) || 1, 1), count) - 1);
     }
     else if (name === 'guide') view = guideIntroView();
+    else if (name === 'review') view = reviewView();
     else if (name === 'pray') view = prayWalkView(parseInt(arg, 10) || 1);
     else if (name === 'prayer') view = prayerView();
     else if (name === 'aloud') view = aloudView();
@@ -459,7 +456,8 @@
     answers = L.steps.map(() => '');
     parts = L.steps.map((st) => (st.guided || []).map(() => ''));
     loadDraft();
-    window.addEventListener('hashchange', () => render(true));
+    // The skip link's target is #main, which is not a screen: never route to it.
+    window.addEventListener('hashchange', () => { if (location.hash !== '#main') render(true); });
     render(false);
 
     if ('serviceWorker' in navigator) {

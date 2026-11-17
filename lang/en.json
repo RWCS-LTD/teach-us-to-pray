@@ -23,19 +23,8 @@
     "about": "About and privacy",
     "back": "Back",
     "next": "Next",
-    "skip": "Skip this step",
-    "finish": "See your prayer",
     "start": "Start",
     "skipQuestion": "Skip this question"
-  },
-  "mode": {
-    "heading": "How would you like to pray today?",
-    "guided": "Guide me",
-    "guidedHint": "One short question at a time. About 10 minutes.",
-    "open": "On my own",
-    "openHint": "One question in each step. About 5 minutes.",
-    "toOpen": "Use one box per step instead",
-    "toGuided": "Guide me with short questions instead"
   },
   "guide": {
     "introHeading": "Before you begin",
@@ -45,14 +34,18 @@
     ],
     "intro": [
       "There are seven short steps. Each one shows the words of Jesus and asks you one question at a time.",
-      "One sentence is enough. You may leave any question blank.",
-      "At the end you will pray your prayer out loud."
+      "Answer each question as if you are speaking to him, in a sentence of your own. You may leave any question blank.",
+      "At the end you will read your prayer through, then pray it out loud."
     ],
     "begin": "Begin",
     "questionOf": ", question {k} of {count}",
     "exampleHeading": "A prayer from Scripture",
-    "hint": "A few words are enough. You may leave this blank.",
-    "hintCues": "Tap a word to add it, or write your own. A few words are enough. You may leave this blank.",
+    "hint": "Write it as you would say it to him. You may leave this blank.",
+    "editedHere": "Your words for this step, as you changed them, are all here.",
+    "editedFirst": "Your words for this step, as you changed them, are all in its first question.",
+    "toReview": "Read your prayer through",
+    "reviewHeading": "Read your prayer through",
+    "reviewHint": "Read it slowly, as if you are speaking to him. Change any words that are not true or do not sound like you, and join any words that run together.",
     "toAloud": "Pray it out loud",
     "partOf": "Part {n} of {total}",
     "sayThis": "Say this out loud.",
@@ -68,6 +61,7 @@
       "Each step shows the words of Jesus and asks you a question.",
       "You answer in your own words. The app never writes a prayer for you."
     ],
+    "begin": "Begin",
     "whyLink": "Why we pray this way (Matthew 6:5-8)"
   },
   "why": {
@@ -95,13 +89,10 @@
   },
   "step": {
     "progress": "Step {n} of {total}",
-    "jesusWords": "The words of Jesus",
-    "relatedHeading": "Also in Scripture",
+    "relatedHeading": "Also in Scripture today",
     "moreLink": "More from Scripture for this step",
     "perDay": 2,
-    "inputHint": "Write as much or as little as you like. You may leave this blank.",
-    "cuesLabel": "Think about",
-    "sayAloud": "When you have written your words, say them out loud."
+    "cuesLabel": "Think about"
   },
   "steps": [
     {
@@ -153,10 +144,12 @@
           "PSA 103:13"
         ]
       ],
-      "prompt": "You are speaking to the one true God, your Father. How do you want to address him?",
       "guided": [
         {
-          "q": "Jesus began with the words above. What words will you begin with?"
+          "q": "Jesus called God his Father in heaven. Speak to him now. How will you begin?",
+          "cues": [
+            "how you are coming to him today"
+          ]
         }
       ]
     },
@@ -202,10 +195,9 @@
           "PSA 100:4"
         ]
       ],
-      "prompt": "What about God do you honor or thank him for?",
       "guided": [
         {
-          "q": "Name one thing that is true about God that you honor.",
+          "q": "Tell him what you honor about him today.",
           "cues": [
             "who he is",
             "what he has made",
@@ -216,11 +208,10 @@
           ]
         },
         {
-          "q": "Name one thing he has done that you thank him for today.",
+          "q": "Thank him for something from the last day or two.",
           "cues": [
-            "today",
-            "this week",
-            "your family",
+            "a person",
+            "a moment",
             "a prayer he answered"
           ],
           "example": [
@@ -261,15 +252,14 @@
           "PSA 40:8"
         ]
       ],
-      "prompt": "Where do you want his will done: in the world, your family, you?",
       "guided": [
         {
-          "q": "Where do you want his kingdom to come and his will to be done? Name one place.",
+          "q": "Where in your life today do you want his will done? Tell him.",
           "cues": [
-            "in you",
-            "your home",
-            "your work",
-            "your town",
+            "in me",
+            "my home",
+            "my work",
+            "my town",
             "the world"
           ],
           "example": [
@@ -277,7 +267,7 @@
           ]
         },
         {
-          "q": "Is there a decision in front of you? Ask for his will in it.",
+          "q": "If there is a decision in front of you, ask him for his will in it.",
           "example": [
             "PSA 143:10"
           ]
@@ -318,10 +308,9 @@
           "PSA 23:1"
         ]
       ],
-      "prompt": "What do you need for today? Who else needs provision?",
       "guided": [
         {
-          "q": "What do you need today? Name it plainly.",
+          "q": "Ask him plainly for what you need today.",
           "cues": [
             "food and home",
             "work",
@@ -334,7 +323,7 @@
           ]
         },
         {
-          "q": "Who else needs something today? Name them.",
+          "q": "Ask him for what someone else needs today. Say their name.",
           "cues": [
             "family",
             "a friend",
@@ -396,21 +385,20 @@
           "PSA 103:12"
         ]
       ],
-      "prompt": "What do you need forgiveness for? Who do you need to forgive?",
       "guided": [
         {
-          "q": "What do you need to ask forgiveness for?",
+          "q": "Tell him what you need forgiveness for.",
           "cues": [
-            "something you did",
-            "something you said",
-            "something you left undone"
+            "something I did",
+            "something I said",
+            "something I left undone"
           ],
           "example": [
             "LUK 18:13"
           ]
         },
         {
-          "q": "Who do you need to forgive? Name them.",
+          "q": "If there is someone you need to forgive, tell him, and say their name.",
           "example": [
             "LUK 23:34"
           ]
@@ -447,20 +435,19 @@
           "PSA 46:1"
         ]
       ],
-      "prompt": "Where do you need strength or protection?",
       "note": "The World English Bible prints one more sentence in this verse, with a footnote that some Greek texts omit it. It is not shown here.",
       "guided": [
         {
-          "q": "What is tempting you right now?",
+          "q": "Tell him where you are being tempted right now.",
           "cues": [
             "at home",
             "at work",
-            "when you are alone",
-            "when you are tired or angry"
+            "when I am alone",
+            "when I am tired or angry"
           ]
         },
         {
-          "q": "What do you need to be delivered from?",
+          "q": "Ask him to deliver you from what you need delivering from.",
           "cues": [
             "a fear",
             "a habit",
@@ -502,10 +489,9 @@
           "PSA 19:14"
         ]
       ],
-      "prompt": "Anything to say to close? (Optional)",
       "guided": [
         {
-          "q": "How will you close your prayer?",
+          "q": "Close your prayer to him in your own words.",
           "example": [
             "PSA 19:14"
           ]
@@ -515,8 +501,8 @@
   ],
   "prayer": {
     "heading": "Your prayer",
-    "intro": "These are your own words, in the order Jesus taught.",
-    "empty": "You have not written anything yet. Go back to any step and add your own words.",
+    "intro": "Your prayer for today, in your own words.",
+    "empty": "You have not written anything yet. Begin, and answer in your own words.",
     "copy": "Copy",
     "copied": "Copied to your clipboard.",
     "copyFailed": "Could not copy. Select the text and copy it by hand.",
@@ -556,7 +542,8 @@
       "The structure follows the prayer Jesus taught in Matthew 6:5-15 and Luke 11:1-4. Every other quotation is Scripture, shown with its reference.",
       "Scripture quotations are from the World English Bible (WEB), which is in the public domain. The text was taken from eBible.org. \"World English Bible\" is a trademark of eBible.org.",
       "Where a reference ends in \"a\" or \"b\", only that part of the verse is shown. The words shown are unchanged.",
-      "The app adds no teaching of its own. The only words that are ours are the step names, headings and buttons, the questions, the short \"Think about\" lists under them, the short introduction to \"Guide me\", the reminders to pray out loud, and this page."
+      "Where an excerpt begins or ends partway through a speech, the quotation mark that opens or closes that speech elsewhere is not shown at the start or end of the excerpt.",
+      "The app adds no teaching of its own. The only words that are ours are the step names, headings and buttons, the questions, the short \"Think about\" prompts under them, the start screen, the instruction on the read-through screen, the reminders to pray out loud, and this page."
     ],
     "doxologyHeading": "Matthew 6:13",
     "doxology": "The World English Bible prints one more sentence at the end of Matthew 6:13, with a footnote that some Greek texts omit it. This app does not show that sentence.",
@@ -566,9 +553,9 @@
     "sourceCodeUrl": "",
     "howHeading": "How it works",
     "how": [
-      "There are seven steps, in the order Jesus gave. Each step shows his words, other passages of Scripture that change each day, and a place for your own words.",
-      "\"Guide me\" asks one short question at a time, shows a short prayer from Scripture beside most of them, and ends with you praying your prayer out loud, one part at a time. \"On my own\" asks one question in each step. Both build the same prayer, and you can switch at any step.",
-      "At the end you see your prayer in your own words, to pray out loud. The app never writes a prayer for you."
+      "There are seven steps, in the order Jesus gave. Each step shows his words and asks you one short question at a time. Most questions show a short prayer from Scripture, and each step offers other passages of Scripture that change each day.",
+      "Before you pray, you read your whole prayer through in one place and change anything that is not true or does not sound like you. Then you pray it out loud, one part at a time.",
+      "At the end you see your prayer in your own words. The app never writes a prayer for you, and it never changes your words."
     ]
   }
 }
