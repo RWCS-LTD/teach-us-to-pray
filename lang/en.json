@@ -1,0 +1,146 @@
+{
+  "meta": {
+    "lang": "en",
+    "dir": "ltr",
+    "languageName": "English",
+    "scriptureFile": "scripture/en-web.json"
+  },
+  "app": {
+    "name": "Teach Us to Pray",
+    "description": "Learn to pray in your own words, following the pattern Jesus gave in the Lord's Prayer.",
+    "skipToContent": "Skip to content",
+    "ourNoteLabel": "Our note",
+    "translationCredit": "World English Bible (WEB), public domain"
+  },
+  "books": {
+    "MAT": "Matthew",
+    "MRK": "Mark",
+    "LUK": "Luke",
+    "JHN": "John",
+    "PSA": "Psalm"
+  },
+  "nav": {
+    "about": "About and privacy",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip this step",
+    "finish": "See your prayer",
+    "start": "Start"
+  },
+  "welcome": {
+    "heading": "Teach Us to Pray",
+    "verses": ["LUK 11:1", "MAT 6:9a"],
+    "body": [
+      "Each step shows the words of Jesus and asks you a question.",
+      "You answer in your own words. The app never writes a prayer for you."
+    ],
+    "whyLink": "Why we pray this way (Matthew 6:5-8)"
+  },
+  "why": {
+    "heading": "Why we pray this way",
+    "sections": [
+      { "heading": "Matthew 6:5-8", "verses": ["MAT 6:5", "MAT 6:6", "MAT 6:7", "MAT 6:8"] },
+      { "heading": "Luke 11:1-4", "verses": ["LUK 11:1", "LUK 11:2", "LUK 11:3", "LUK 11:4"] }
+    ]
+  },
+  "step": {
+    "progress": "Step {n} of {total}",
+    "jesusWords": "The words of Jesus",
+    "relatedHeading": "Also in Scripture",
+    "moreLink": "More from Scripture for this step",
+    "perDay": 2,
+    "inputHint": "Write as much or as little as you like. You may leave this blank."
+  },
+  "steps": [
+    {
+      "name": "Come to the Father",
+      "verses": [["MAT 6:9a"]],
+      "related": [["MAT 6:6"], ["MAT 6:7", "MAT 6:8"], ["MRK 1:35"], ["JHN 4:23", "JHN 4:24"], ["LUK 11:9", "LUK 11:10", "LUK 11:11", "LUK 11:12", "LUK 11:13"], ["LUK 18:1", "LUK 18:2", "LUK 18:3", "LUK 18:4", "LUK 18:5", "LUK 18:6", "LUK 18:7", "LUK 18:8"],["PSA 145:18"], ["PSA 62:8"], ["PSA 103:13"]],
+      "prompt": "You are speaking to the one true God, your Father. How do you want to address him?"
+    },
+    {
+      "name": "Honor his name",
+      "verses": [["MAT 6:9b"]],
+      "related": [["JHN 12:27", "JHN 12:28"], ["LUK 10:21"], ["JHN 11:41", "JHN 11:42"], ["MAT 22:37", "MAT 22:38"], ["JHN 17:1", "JHN 17:2", "JHN 17:3"], ["PSA 8:1"], ["PSA 103:1", "PSA 103:2", "PSA 103:3", "PSA 103:4", "PSA 103:5"],["PSA 100:4"]],
+      "prompt": "What about God do you honor or thank him for?"
+    },
+    {
+      "name": "His kingdom and will",
+      "verses": [["MAT 6:10"]],
+      "related": [["MAT 6:33"], ["MAT 26:39"], ["MAT 9:37", "MAT 9:38"], ["MAT 7:21"], ["JHN 6:38"], ["PSA 143:10"], ["PSA 40:7", "PSA 40:8"]],
+      "prompt": "Where do you want his will done: in the world, your family, you?"
+    },
+    {
+      "name": "Daily bread",
+      "verses": [["MAT 6:11"]],
+      "related": [["MAT 6:31", "MAT 6:32"], ["MAT 7:7", "MAT 7:8", "MAT 7:9", "MAT 7:10", "MAT 7:11"], ["MAT 6:25", "MAT 6:26"],["JHN 6:35"], ["PSA 145:15", "PSA 145:16"], ["PSA 23:1"]],
+      "prompt": "What do you need for today? Who else needs provision?"
+    },
+    {
+      "name": "Forgive us",
+      "verses": [["MAT 6:12"], ["MAT 6:14", "MAT 6:15"]],
+      "related": [["MRK 11:25"], ["MAT 18:21", "MAT 18:22"], ["MAT 5:44", "MAT 5:45"], ["LUK 18:9", "LUK 18:10", "LUK 18:11", "LUK 18:12", "LUK 18:13", "LUK 18:14"],["LUK 6:37"], ["LUK 23:34"], ["MAT 5:23", "MAT 5:24"], ["PSA 51:1", "PSA 51:2"], ["PSA 32:5"], ["PSA 103:12"]],
+      "prompt": "What do you need forgiveness for? Who do you need to forgive?"
+    },
+    {
+      "name": "Keep us and deliver us",
+      "verses": [["MAT 6:13a"]],
+      "related": [["MAT 26:40", "MAT 26:41"], ["JHN 17:15"], ["LUK 22:31", "LUK 22:32"],["JHN 16:33"], ["PSA 121:7", "PSA 121:8"], ["PSA 46:1"]],
+      "prompt": "Where do you need strength or protection?",
+      "note": "The World English Bible prints one more sentence in this verse, with a footnote that some Greek texts omit it. It is not shown here."
+    },
+    {
+      "name": "Close",
+      "verses": [["JHN 14:13", "JHN 14:14"], ["JHN 16:23", "JHN 16:24"]],
+      "related": [["JHN 15:7"], ["JHN 15:16"], ["MAT 18:19", "MAT 18:20"], ["MAT 21:22"], ["PSA 19:14"]],
+      "prompt": "Anything to say to close? (Optional)"
+    }
+  ],
+  "prayer": {
+    "heading": "Your prayer",
+    "intro": "These are your own words, in the order Jesus taught.",
+    "empty": "You have not written anything yet. Go back to any step and add your own words.",
+    "copy": "Copy",
+    "copied": "Copied to your clipboard.",
+    "copyFailed": "Could not copy. Select the text and copy it by hand.",
+    "print": "Print",
+    "aloud": "Pray it aloud (large text)",
+    "aloudHeading": "Your prayer",
+    "aloudClose": "Close large text",
+    "edit": "Edit my words"
+  },
+  "draft": {
+    "heading": "Saving",
+    "toggle": "Keep my draft on this device",
+    "explain": "Off by default. When on, your words are kept in this browser on this device only. They are never sent anywhere.",
+    "erase": "Erase my words",
+    "eraseConfirm": "Erase everything you have written, here and on this device?",
+    "erased": "Your words have been erased."
+  },
+  "about": {
+    "heading": "About and privacy",
+    "whoHeading": "Why this exists",
+    "who": [
+      "This app exists only to serve the ministry of Jesus, the Son of God. It shows how he taught us to pray, so that you can pray in your own words.",
+      "It is free. There are no ads, no accounts, no donations and no tracking."
+    ],
+    "privacyHeading": "Privacy",
+    "privacy": [
+      "What you write never leaves your device. The app has no server, sends nothing over the internet, and uses no cookies or analytics.",
+      "Nothing is saved unless you turn on \"Keep my draft on this device\". If you do, your words are stored only in this browser, and \"Erase my words\" removes them."
+    ],
+    "sourcesHeading": "Sources",
+    "sources": [
+      "The structure follows the prayer Jesus taught in Matthew 6:5-15 and Luke 11:1-4. Every other quotation is Scripture, shown with its reference.",
+      "Scripture quotations are from the World English Bible (WEB), which is in the public domain. The text was taken from eBible.org. \"World English Bible\" is a trademark of eBible.org.",
+      "Where a reference ends in \"a\" or \"b\", only that part of the verse is shown. The words shown are unchanged.",
+      "The app adds no teaching of its own. The only words that are ours are the step names, the questions, the buttons and this page."
+    ],
+    "doxologyHeading": "Matthew 6:13",
+    "doxology": "The World English Bible prints one more sentence at the end of Matthew 6:13, with a footnote that some Greek texts omit it. This app does not show that sentence.",
+    "licenseHeading": "License",
+    "license": "The code is released under the MIT License. The Scripture text is public domain.",
+    "sourceCodeLabel": "Source code",
+    "sourceCodeUrl": ""
+  }
+}
