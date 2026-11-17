@@ -2,6 +2,14 @@
 
 Scripture: World English Bible (Public Domain), from https://eBible.org/Scriptures/eng-web_usfm.zip
 
+## Guide me: start screen
+
+- **Matthew 6:7-8** — In praying, don’t use vain repetitions as the Gentiles do; for they think that they will be heard for their much speaking. Therefore don’t be like them, for your Father knows what things you need before you ask him.
+
+- There are seven short steps. Each one shows the words of Jesus and asks you one question at a time.
+- One sentence is enough. You may leave any question blank.
+- At the end you will pray your prayer out loud.
+
 ## Step 1: Come to the Father
 
 The words of Jesus for this step (always shown):
@@ -37,7 +45,9 @@ Question: *What about God do you honor or thank him for?*
 Guided questions:
 
 - *Name one thing that is true about God that you honor.* (Think about: who he is, what he has made, what he has said)
+  - A prayer from Scripture shown with it: **Psalm 8:1** — Yahweh, our Lord, how majestic is your name in all the earth! You have set your glory above the heavens!
 - *Name one thing he has done that you thank him for today.* (Think about: today, this week, your family, a prayer he answered)
+  - A prayer from Scripture shown with it: **John 11:41** — So they took away the stone from the place where the dead man was lying. Jesus lifted up his eyes and said, “Father, I thank you that you listened to me.
 
 Rotating pool (8 entries, 2 shown per day):
 
@@ -61,7 +71,9 @@ Question: *Where do you want his will done: in the world, your family, you?*
 Guided questions:
 
 - *Where do you want his kingdom to come and his will to be done? Name one place.* (Think about: in you, your home, your work, your town, the world)
+  - A prayer from Scripture shown with it: **Matthew 26:39** — He went forward a little, fell on his face, and prayed, saying, “My Father, if it is possible, let this cup pass away from me; nevertheless, not what I desire, but what you desire.”
 - *Is there a decision in front of you? Ask for his will in it.*
+  - A prayer from Scripture shown with it: **Psalm 143:10** — Teach me to do your will, for you are my God. Your Spirit is good. Lead me in the land of uprightness.
 
 Rotating pool (7 entries, 2 shown per day):
 
@@ -84,6 +96,7 @@ Question: *What do you need for today? Who else needs provision?*
 Guided questions:
 
 - *What do you need today? Name it plainly.* (Think about: food and home, work, health, strength for today)
+  - A prayer from Scripture shown with it: **Psalm 145:15-16** — The eyes of all wait for you. You give them their food in due season. You open your hand, and satisfy the desire of every living thing.
 - *Who else needs something today? Name them.* (Think about: family, a friend, someone who is sick, someone in need)
 
 Rotating pool (6 entries, 2 shown per day):
@@ -107,7 +120,9 @@ Question: *What do you need forgiveness for? Who do you need to forgive?*
 Guided questions:
 
 - *What do you need to ask forgiveness for?* (Think about: something you did, something you said, something you left undone)
+  - A prayer from Scripture shown with it: **Luke 18:13** — But the tax collector, standing far away, wouldn’t even lift up his eyes to heaven, but beat his chest, saying, ‘God, be merciful to me, a sinner!’
 - *Who do you need to forgive? Name them.*
+  - A prayer from Scripture shown with it: **Luke 23:34** — Jesus said, “Father, forgive them, for they don’t know what they are doing.” Dividing his garments among them, they cast lots.
 
 Rotating pool (10 entries, 2 shown per day):
 
@@ -134,6 +149,7 @@ Guided questions:
 
 - *What is tempting you right now?* (Think about: at home, at work, when you are alone, when you are tired or angry)
 - *What do you need to be delivered from?* (Think about: a fear, a habit, a danger)
+  - A prayer from Scripture shown with it: **John 17:15** — I pray not that you would take them from the world, but that you would keep them from the evil one.
 
 Our note: The World English Bible prints one more sentence in this verse, with a footnote that some Greek texts omit it. It is not shown here.
 
@@ -158,6 +174,7 @@ Question: *Anything to say to close? (Optional)*
 Guided questions:
 
 - *How will you close your prayer?*
+  - A prayer from Scripture shown with it: **Psalm 19:14** — Let the words of my mouth and the meditation of my heart be acceptable in your sight, Yahweh, my rock, and my redeemer.
 
 Rotating pool (5 entries, 2 shown per day):
 

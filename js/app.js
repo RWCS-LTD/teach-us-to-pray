@@ -113,8 +113,8 @@
         paragraphs(L.welcome.body),
         h('h2', null, L.mode.heading),
         h('div', { class: 'choices' },
-          modeChoice('guided', L.mode.guided, L.mode.guidedHint, 'primary'),
-          modeChoice('open', L.mode.open, L.mode.openHint, '')),
+          modeChoice('guided', '#/guide', L.mode.guided, L.mode.guidedHint, 'primary'),
+          modeChoice('open', '#/step/1', L.mode.open, L.mode.openHint, '')),
         h('p', null, h('a', { href: '#/why' }, L.welcome.whyLink)),
         draftSection(),
       ],
@@ -122,9 +122,9 @@
   }
 
   // A large button on the welcome screen that picks how to pray and starts.
-  function modeChoice(value, label, hint, extraClass) {
+  function modeChoice(value, href, label, hint, extraClass) {
     return h('a', {
-      class: 'btn choice ' + extraClass, href: '#/step/1',
+      class: 'btn choice ' + extraClass, href,
       onclick: () => { mode = value; saveDraft(); },
     }, h('strong', null, label), h('span', null, hint));
   }
@@ -155,71 +155,166 @@
     return [today, rest];
   }
 
+  const progressText = (n) => L.step.progress.replace('{n}', n).replace('{total}', L.steps.length);
+  const dots = (i) => h('ol', { class: 'dots', 'aria-hidden': 'true' },
+    L.steps.map((_, j) => h('li', { class: j <= i ? 'done' : '' })));
+  // Guided mode keeps the words of each short question; a step's words are those joined together.
+  const joined = (i) => parts[i].filter((t) => t.trim()).join('\n');
+
+  // A link that changes how the questions are asked, staying on the same step.
+  function switchLink(toMode, label, i) {
+    return h('button', {
+      type: 'button', class: 'link',
+      onclick: () => {
+        mode = toMode;
+        saveDraft();
+        const target = '#/step/' + (i + 1);
+        if (location.hash === target) render(true); else location.hash = target;
+      },
+    }, label);
+  }
+
+  // "On my own": one question and one box for the step.
   function stepView(i) {
     const step = L.steps[i];
     const n = i + 1;
     const total = L.steps.length;
-    const progress = L.step.progress.replace('{n}', n).replace('{total}', total);
+    const progress = progressText(n);
     const [today, rest] = todaysPassages(step.related);
 
     const nextLabel = () => (n === total ? L.nav.finish : answers[i].trim() ? L.nav.next : L.nav.skip);
     const next = h('a', { class: 'btn primary grow', href: n < total ? '#/step/' + (n + 1) : '#/prayer' }, nextLabel());
 
-    // Every box starts with the person's own words or nothing at all.
+    // The box always starts with the person's own words or nothing at all.
     // Spell-check is off so that no browser service is sent what is typed.
-    const guided = mode === 'guided' && step.guided;
-    const joined = () => parts[i].filter((t) => t.trim()).join('\n');
-    let ask;
-    if (guided) {
-      // If the words were changed in the single box, keep them all: put them in the first short box.
-      if (joined() !== answers[i]) parts[i] = parts[i].map((_, k) => (k ? '' : answers[i]));
-      ask = step.guided.map((item, k) => {
-        const box = h('textarea', {
-          id: 'words-' + k, class: 'short', rows: '3', autocomplete: 'off', spellcheck: 'false',
-          'aria-describedby': (item.cues ? 'cues-' + k + ' ' : '') + 'words-hint',
-          oninput: (e) => { parts[i][k] = e.target.value; answers[i] = joined(); next.textContent = nextLabel(); saveDraft(); },
-        });
-        box.value = parts[i][k];
-        return h('div', { class: 'ask' },
-          h('label', { for: 'words-' + k }, item.q),
-          item.cues && h('p', { class: 'cues', id: 'cues-' + k }, L.step.cuesLabel + ': ' + item.cues.join(' \u00b7 ')),
-          box);
-      });
-      ask.push(h('p', { class: 'hint', id: 'words-hint' }, L.step.guidedHint));
-    } else {
-      const box = h('textarea', {
-        id: 'words', rows: '6', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'words-hint',
-        oninput: (e) => { answers[i] = e.target.value; next.textContent = nextLabel(); saveDraft(); },
-      });
-      box.value = answers[i];
-      ask = h('div', { class: 'ask' },
-        h('label', { for: 'words' }, step.prompt),
-        h('p', { class: 'hint', id: 'words-hint' }, L.step.inputHint),
-        box);
-    }
-    const switchMode = step.guided && h('button', {
-      type: 'button', class: 'link',
-      onclick: () => { mode = guided ? 'open' : 'guided'; saveDraft(); render(false); },
-    }, guided ? L.mode.toOpen : L.mode.toGuided);
+    const box = h('textarea', {
+      id: 'words', rows: '6', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'words-hint',
+      oninput: (e) => { answers[i] = e.target.value; next.textContent = nextLabel(); saveDraft(); },
+    });
+    box.value = answers[i];
 
     return {
       title: progress + ': ' + step.name,
       nodes: [
         h('p', { class: 'progress' }, progress),
-        h('ol', { class: 'dots', 'aria-hidden': 'true' },
-          L.steps.map((_, j) => h('li', { class: j <= i ? 'done' : '' }))),
+        dots(i),
         h('h1', null, step.name),
         h('h2', null, L.step.jesusWords),
         step.verses.map((g) => passage(g, 'main')),
         step.note && h('p', { class: 'note' }, h('strong', null, L.app.ourNoteLabel + ': '), step.note),
         today.length > 0 && [h('h2', null, L.step.relatedHeading), today.map((g) => passage(g))],
         rest.length > 0 && h('details', null, h('summary', null, L.step.moreLink), rest.map((g) => passage(g))),
-        ask,
+        h('div', { class: 'ask' },
+          h('label', { for: 'words' }, step.prompt),
+          h('p', { class: 'hint', id: 'words-hint' }, L.step.inputHint),
+          box),
         h('p', { class: 'say' }, L.step.sayAloud),
-        switchMode,
+        step.guided && switchLink('guided', L.mode.toGuided, i),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: n > 1 ? '#/step/' + (n - 1) : '#/' }, L.nav.back),
           next),
+      ],
+    };
+  }
+
+  // "Guide me": a short start screen with the words of Jesus about praying simply.
+  function guideIntroView() {
+    const g = L.guide;
+    return {
+      title: g.introHeading,
+      nodes: [
+        h('h1', null, g.introHeading),
+        passage(g.introVerses),
+        paragraphs(g.intro),
+        h('div', { class: 'actions' },
+          h('a', { class: 'btn', href: '#/' }, L.nav.back),
+          h('a', { class: 'btn primary grow', href: '#/step/1/1' }, g.begin)),
+      ],
+    };
+  }
+
+  // "Guide me": one short question on the screen at a time.
+  function guideView(i, k) {
+    const g = L.guide;
+    const step = L.steps[i];
+    const item = step.guided[k];
+    const count = step.guided.length;
+    const n = i + 1;
+    const progress = progressText(n) + (count > 1 ? g.questionOf.replace('{k}', k + 1).replace('{count}', count) : '');
+    const last = n === L.steps.length && k === count - 1;
+
+    // If the words were changed in the single box, keep them all: put them under the first question.
+    if (joined(i) !== answers[i]) parts[i] = parts[i].map((_, q) => (q ? '' : answers[i]));
+
+    const nextHref = k + 1 < count ? '#/step/' + n + '/' + (k + 2) : last ? '#/pray/1' : '#/step/' + (n + 1) + '/1';
+    const backHref = k > 0 ? '#/step/' + n + '/' + k
+      : i > 0 ? '#/step/' + i + '/' + L.steps[i - 1].guided.length : '#/guide';
+    const nextLabel = () => (last ? g.toAloud : parts[i][k].trim() ? L.nav.next : L.nav.skipQuestion);
+    const next = h('a', { class: 'btn primary grow', href: nextHref }, nextLabel());
+
+    // The box always starts with the person's own words or nothing at all.
+    // Spell-check is off so that no browser service is sent what is typed.
+    const update = () => { parts[i][k] = box.value; answers[i] = joined(i); next.textContent = nextLabel(); saveDraft(); };
+    const box = h('textarea', {
+      id: 'words', class: 'short', rows: '4', autocomplete: 'off', spellcheck: 'false',
+      'aria-describedby': 'words-hint', oninput: update,
+    });
+    box.value = parts[i][k];
+
+    // Tapping a "Think about" word adds that word to the box. It never adds a sentence.
+    const cues = item.cues && h('div', { class: 'cues', role: 'group', 'aria-labelledby': 'cues-label' },
+      h('span', { id: 'cues-label' }, L.step.cuesLabel + ':'),
+      item.cues.map((cue) => h('button', {
+        type: 'button', class: 'chip',
+        onclick: () => {
+          const v = box.value;
+          box.value = v + (v && !/\s$/.test(v) ? ', ' : '') + cue;
+          update();
+          box.focus();
+        },
+      }, cue)));
+
+    return {
+      title: progress + ': ' + step.name,
+      nodes: [
+        h('p', { class: 'progress' }, progress),
+        dots(i),
+        h('h1', null, step.name),
+        step.verses.map((v) => passage(v, 'main')),
+        step.note && h('p', { class: 'note' }, h('strong', null, L.app.ourNoteLabel + ': '), step.note),
+        h('div', { class: 'ask' },
+          h('label', { for: 'words' }, item.q),
+          item.example && [h('h2', { class: 'small' }, g.exampleHeading), passage(item.example)],
+          cues,
+          box,
+          h('p', { class: 'hint', id: 'words-hint' }, item.cues ? g.hintCues : g.hint)),
+        h('div', { class: 'actions' },
+          h('a', { class: 'btn', href: backHref }, L.nav.back),
+          next),
+        h('details', null, h('summary', null, L.step.moreLink), step.related.map((v) => passage(v))),
+        switchLink('open', L.mode.toOpen, i),
+      ],
+    };
+  }
+
+  // "Guide me" ends here: the person's own words in large text, one part at a time, to say out loud.
+  function prayWalkView(n) {
+    const g = L.guide;
+    const said = L.steps.map((st, i) => ({ name: st.name, text: answers[i] })).filter((part) => part.text.trim());
+    if (!said.length) return prayerView();
+    const idx = Math.min(Math.max(n, 1), said.length) - 1;
+    const progress = g.partOf.replace('{n}', idx + 1).replace('{total}', said.length);
+    const lastPart = idx === said.length - 1;
+    return {
+      title: progress + ': ' + said[idx].name,
+      nodes: [
+        h('p', { class: 'progress' }, progress + ' \u00b7 ' + said[idx].name),
+        h('h1', null, g.sayThis),
+        h('div', { class: 'aloud' }, h('p', null, said[idx].text)),
+        h('div', { class: 'actions' },
+          h('a', { class: 'btn', href: idx > 0 ? '#/pray/' + idx : '#/step/' + L.steps.length }, L.nav.back),
+          h('a', { class: 'btn primary grow', href: lastPart ? '#/prayer' : '#/pray/' + (idx + 2) },
+            lastPart ? g.finish : L.nav.next)),
       ],
     };
   }
@@ -318,10 +413,17 @@
   /* ---------- router ---------- */
 
   function render(moveFocus) {
-    const [name, arg] = location.hash.replace(/^#\/?/, '').split('/');
+    const [name, arg, arg2] = location.hash.replace(/^#\/?/, '').split('/');
     const stepIndex = parseInt(arg, 10) - 1;
     let view;
-    if (name === 'step' && L.steps[stepIndex]) view = stepView(stepIndex);
+    if (name === 'step' && L.steps[stepIndex]) {
+      const questions = mode === 'guided' && L.steps[stepIndex].guided;
+      view = questions
+        ? guideView(stepIndex, Math.min(Math.max(parseInt(arg2, 10) || 1, 1), questions.length) - 1)
+        : stepView(stepIndex);
+    }
+    else if (name === 'guide') view = guideIntroView();
+    else if (name === 'pray') view = prayWalkView(parseInt(arg, 10) || 1);
     else if (name === 'prayer') view = prayerView();
     else if (name === 'aloud') view = aloudView();
     else if (name === 'about') view = aboutView();

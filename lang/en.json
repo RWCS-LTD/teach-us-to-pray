@@ -25,16 +25,38 @@
     "next": "Next",
     "skip": "Skip this step",
     "finish": "See your prayer",
-    "start": "Start"
+    "start": "Start",
+    "skipQuestion": "Skip this question"
   },
   "mode": {
     "heading": "How would you like to pray today?",
     "guided": "Guide me",
-    "guidedHint": "A few short questions in each step. About 10 minutes.",
+    "guidedHint": "One short question at a time. About 10 minutes.",
     "open": "On my own",
     "openHint": "One question in each step. About 5 minutes.",
     "toOpen": "Use one box per step instead",
     "toGuided": "Guide me with short questions instead"
+  },
+  "guide": {
+    "introHeading": "Before you begin",
+    "introVerses": [
+      "MAT 6:7",
+      "MAT 6:8"
+    ],
+    "intro": [
+      "There are seven short steps. Each one shows the words of Jesus and asks you one question at a time.",
+      "One sentence is enough. You may leave any question blank.",
+      "At the end you will pray your prayer out loud."
+    ],
+    "begin": "Begin",
+    "questionOf": ", question {k} of {count}",
+    "exampleHeading": "A prayer from Scripture",
+    "hint": "A few words are enough. You may leave this blank.",
+    "hintCues": "Tap a word to add it, or write your own. A few words are enough. You may leave this blank.",
+    "toAloud": "Pray it out loud",
+    "partOf": "Part {n} of {total}",
+    "sayThis": "Say this out loud.",
+    "finish": "Finish"
   },
   "welcome": {
     "heading": "Teach Us to Pray",
@@ -79,7 +101,6 @@
     "perDay": 2,
     "inputHint": "Write as much or as little as you like. You may leave this blank.",
     "cuesLabel": "Think about",
-    "guidedHint": "A few words are enough. You may leave any box blank.",
     "sayAloud": "When you have written your words, say them out loud."
   },
   "steps": [
@@ -189,6 +210,9 @@
             "who he is",
             "what he has made",
             "what he has said"
+          ],
+          "example": [
+            "PSA 8:1"
           ]
         },
         {
@@ -198,6 +222,9 @@
             "this week",
             "your family",
             "a prayer he answered"
+          ],
+          "example": [
+            "JHN 11:41"
           ]
         }
       ]
@@ -244,10 +271,16 @@
             "your work",
             "your town",
             "the world"
+          ],
+          "example": [
+            "MAT 26:39"
           ]
         },
         {
-          "q": "Is there a decision in front of you? Ask for his will in it."
+          "q": "Is there a decision in front of you? Ask for his will in it.",
+          "example": [
+            "PSA 143:10"
+          ]
         }
       ]
     },
@@ -294,6 +327,10 @@
             "work",
             "health",
             "strength for today"
+          ],
+          "example": [
+            "PSA 145:15",
+            "PSA 145:16"
           ]
         },
         {
@@ -367,10 +404,16 @@
             "something you did",
             "something you said",
             "something you left undone"
+          ],
+          "example": [
+            "LUK 18:13"
           ]
         },
         {
-          "q": "Who do you need to forgive? Name them."
+          "q": "Who do you need to forgive? Name them.",
+          "example": [
+            "LUK 23:34"
+          ]
         }
       ]
     },
@@ -422,6 +465,9 @@
             "a fear",
             "a habit",
             "a danger"
+          ],
+          "example": [
+            "JHN 17:15"
           ]
         }
       ]
@@ -459,7 +505,10 @@
       "prompt": "Anything to say to close? (Optional)",
       "guided": [
         {
-          "q": "How will you close your prayer?"
+          "q": "How will you close your prayer?",
+          "example": [
+            "PSA 19:14"
+          ]
         }
       ]
     }
@@ -507,7 +556,7 @@
       "The structure follows the prayer Jesus taught in Matthew 6:5-15 and Luke 11:1-4. Every other quotation is Scripture, shown with its reference.",
       "Scripture quotations are from the World English Bible (WEB), which is in the public domain. The text was taken from eBible.org. \"World English Bible\" is a trademark of eBible.org.",
       "Where a reference ends in \"a\" or \"b\", only that part of the verse is shown. The words shown are unchanged.",
-      "The app adds no teaching of its own. The only words that are ours are the step names, the questions, the short \"Think about\" lists under them, the reminder to pray out loud, the buttons and this page."
+      "The app adds no teaching of its own. The only words that are ours are the step names, headings and buttons, the questions, the short \"Think about\" lists under them, the short introduction to \"Guide me\", the reminders to pray out loud, and this page."
     ],
     "doxologyHeading": "Matthew 6:13",
     "doxology": "The World English Bible prints one more sentence at the end of Matthew 6:13, with a footnote that some Greek texts omit it. This app does not show that sentence.",
@@ -518,7 +567,7 @@
     "howHeading": "How it works",
     "how": [
       "There are seven steps, in the order Jesus gave. Each step shows his words, other passages of Scripture that change each day, and a place for your own words.",
-      "\"Guide me\" asks one or two short questions in each step. \"On my own\" asks one question in each step. Both build the same prayer, and you can switch at any step.",
+      "\"Guide me\" asks one short question at a time, shows a short prayer from Scripture beside most of them, and ends with you praying your prayer out loud, one part at a time. \"On my own\" asks one question in each step. Both build the same prayer, and you can switch at any step.",
       "At the end you see your prayer in your own words, to pray out loud. The app never writes a prayer for you."
     ]
   }

@@ -1,7 +1,7 @@
 /* Service worker: stores every file on first visit so the app works with no
  * connection. Change CACHE whenever any file below changes, so that phones
  * pick up the new version. */
-const CACHE = 'teach-us-to-pray-v3';
+const CACHE = 'teach-us-to-pray-v4';
 const FILES = [
   './',
   'index.html',

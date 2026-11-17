@@ -30,6 +30,9 @@ def quote(group):
 
 out = [f"# Content review: {L['app']['name']} ({L['meta']['languageName']})", "",
        f"Scripture: {S['translation']} ({S['license']}), from {S['source']}", ""]
+if L.get("guide"):
+    out += ["## Guide me: start screen", "", quote(L["guide"]["introVerses"]), "",
+            *[f"- {line}" for line in L["guide"]["intro"]], ""]
 for i, step in enumerate(L["steps"], 1):
     out += [f"## Step {i}: {step['name']}", "", "The words of Jesus for this step (always shown):", "",
             *[quote(g) for g in step["verses"]], "", f"Question: *{step['prompt']}*", ""]
@@ -38,6 +41,8 @@ for i, step in enumerate(L["steps"], 1):
         for item in step["guided"]:
             cues = f" (Think about: {', '.join(item['cues'])})" if item.get("cues") else ""
             out += [f"- *{item['q']}*{cues}"]
+            if item.get("example"):
+                out += [f"  - A prayer from Scripture shown with it: {quote(item['example'])[2:]}"]
         out += [""]
     if step.get("note"):
         out += [f"Our note: {step['note']}", ""]
