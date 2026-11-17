@@ -7,8 +7,8 @@ It exists only to serve the ministry of Jesus. There is no profit, no ads, no tr
 ## Rules that do not change
 
 - **Free to run forever.** Static files only: no server, no database, no AI, no paid service.
-- **Faithful to the text.** All teaching shown is Scripture, quoted exactly with its reference. Nothing is paraphrased. The only words of ours are the step names, the questions, the button labels and the About page.
-- **Private.** What a person writes never leaves their device. No cookies, no analytics, no outside scripts, fonts or addresses.
+- **Faithful to the text.** All teaching shown is Scripture, quoted exactly with its reference. Nothing is paraphrased. The only words of ours are the step names, the questions, the short "Think about" lists under them, the reminder to pray out loud, the button labels and the About page.
+- **Private.** What a person writes leaves their device only if they choose Copy, Share, Save as a file or Print. No cookies, no analytics, no outside scripts, fonts or addresses.
 - **The app never writes a prayer.** Every text box starts empty and is filled only by the person.
 - **The order is fixed.** The seven steps follow Matthew 6:9-13: the Father, his name, his kingdom and will, and only then our own requests.
 - **Public-domain Scripture only.** Never add ESV, NIV, NLT, NASB or other copyrighted text.

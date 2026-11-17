@@ -304,6 +304,7 @@
       nodes: [
         h('h1', null, a.heading),
         h('h2', null, a.whoHeading), paragraphs(a.who),
+        h('h2', null, a.howHeading), paragraphs(a.how),
         h('h2', null, a.privacyHeading), paragraphs(a.privacy),
         h('h2', null, a.sourcesHeading), paragraphs(a.sources),
         h('h2', null, a.doxologyHeading), h('p', null, a.doxology),
@@ -359,7 +360,16 @@
     window.addEventListener('hashchange', () => render(true));
     render(false);
 
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+    if ('serviceWorker' in navigator) {
+      const hadWorker = !!navigator.serviceWorker.controller;
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadWorker || reloaded || (!keep && written().length)) return;
+        reloaded = true;
+        location.reload();
+      });
+      navigator.serviceWorker.register('sw.js').then((reg) => reg.update()).catch(() => {});
+    }
   }
 
   start();

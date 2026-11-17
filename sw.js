@@ -1,7 +1,7 @@
 /* Service worker: stores every file on first visit so the app works with no
  * connection. Change CACHE whenever any file below changes, so that phones
  * pick up the new version. */
-const CACHE = 'teach-us-to-pray-v2';
+const CACHE = 'teach-us-to-pray-v3';
 const FILES = [
   './',
   'index.html',
@@ -16,7 +16,7 @@ const FILES = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(FILES)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {

@@ -498,21 +498,28 @@
     ],
     "privacyHeading": "Privacy",
     "privacy": [
-      "What you write never leaves your device. The app has no server, sends nothing over the internet, and uses no cookies or analytics.",
-      "Nothing is saved unless you turn on \"Keep my draft on this device\". If you do, your words are stored only in this browser, and \"Erase my words\" removes them."
+      "What you write stays on your device. The app has no server, sends nothing over the internet, and uses no cookies or analytics.",
+      "Your words leave the app only if you choose to send them yourself. \"Copy\" puts them on your clipboard. \"Share\" hands them to the app you pick on your own device. \"Save as a file\" puts a text file in your downloads. \"Print\" sends them to your printer.",
+      "Nothing is kept in the app after you close it unless you turn on \"Keep my draft on this device\". If you do, your words are stored only in this browser, and \"Erase my words\" removes them. Erasing does not remove files you saved or copies you shared."
     ],
     "sourcesHeading": "Sources",
     "sources": [
       "The structure follows the prayer Jesus taught in Matthew 6:5-15 and Luke 11:1-4. Every other quotation is Scripture, shown with its reference.",
       "Scripture quotations are from the World English Bible (WEB), which is in the public domain. The text was taken from eBible.org. \"World English Bible\" is a trademark of eBible.org.",
       "Where a reference ends in \"a\" or \"b\", only that part of the verse is shown. The words shown are unchanged.",
-      "The app adds no teaching of its own. The only words that are ours are the step names, the questions, the buttons and this page."
+      "The app adds no teaching of its own. The only words that are ours are the step names, the questions, the short \"Think about\" lists under them, the reminder to pray out loud, the buttons and this page."
     ],
     "doxologyHeading": "Matthew 6:13",
     "doxology": "The World English Bible prints one more sentence at the end of Matthew 6:13, with a footnote that some Greek texts omit it. This app does not show that sentence.",
     "licenseHeading": "License",
     "license": "The code is released under the MIT License. The Scripture text is public domain.",
     "sourceCodeLabel": "Source code",
-    "sourceCodeUrl": ""
+    "sourceCodeUrl": "",
+    "howHeading": "How it works",
+    "how": [
+      "There are seven steps, in the order Jesus gave. Each step shows his words, other passages of Scripture that change each day, and a place for your own words.",
+      "\"Guide me\" asks one or two short questions in each step. \"On my own\" asks one question in each step. Both build the same prayer, and you can switch at any step.",
+      "At the end you see your prayer in your own words, to pray out loud. The app never writes a prayer for you."
+    ]
   }
 }
