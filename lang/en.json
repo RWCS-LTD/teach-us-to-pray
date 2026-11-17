@@ -27,9 +27,21 @@
     "finish": "See your prayer",
     "start": "Start"
   },
+  "mode": {
+    "heading": "How would you like to pray today?",
+    "guided": "Guide me",
+    "guidedHint": "A few short questions in each step. About 10 minutes.",
+    "open": "On my own",
+    "openHint": "One question in each step. About 5 minutes.",
+    "toOpen": "Use one box per step instead",
+    "toGuided": "Guide me with short questions instead"
+  },
   "welcome": {
     "heading": "Teach Us to Pray",
-    "verses": ["LUK 11:1", "MAT 6:9a"],
+    "verses": [
+      "LUK 11:1",
+      "MAT 6:9a"
+    ],
     "body": [
       "Each step shows the words of Jesus and asks you a question.",
       "You answer in your own words. The app never writes a prayer for you."
@@ -39,8 +51,24 @@
   "why": {
     "heading": "Why we pray this way",
     "sections": [
-      { "heading": "Matthew 6:5-8", "verses": ["MAT 6:5", "MAT 6:6", "MAT 6:7", "MAT 6:8"] },
-      { "heading": "Luke 11:1-4", "verses": ["LUK 11:1", "LUK 11:2", "LUK 11:3", "LUK 11:4"] }
+      {
+        "heading": "Matthew 6:5-8",
+        "verses": [
+          "MAT 6:5",
+          "MAT 6:6",
+          "MAT 6:7",
+          "MAT 6:8"
+        ]
+      },
+      {
+        "heading": "Luke 11:1-4",
+        "verses": [
+          "LUK 11:1",
+          "LUK 11:2",
+          "LUK 11:3",
+          "LUK 11:4"
+        ]
+      }
     ]
   },
   "step": {
@@ -49,51 +77,391 @@
     "relatedHeading": "Also in Scripture",
     "moreLink": "More from Scripture for this step",
     "perDay": 2,
-    "inputHint": "Write as much or as little as you like. You may leave this blank."
+    "inputHint": "Write as much or as little as you like. You may leave this blank.",
+    "cuesLabel": "Think about",
+    "guidedHint": "A few words are enough. You may leave any box blank.",
+    "sayAloud": "When you have written your words, say them out loud."
   },
   "steps": [
     {
       "name": "Come to the Father",
-      "verses": [["MAT 6:9a"]],
-      "related": [["MAT 6:6"], ["MAT 6:7", "MAT 6:8"], ["MRK 1:35"], ["JHN 4:23", "JHN 4:24"], ["LUK 11:9", "LUK 11:10", "LUK 11:11", "LUK 11:12", "LUK 11:13"], ["LUK 18:1", "LUK 18:2", "LUK 18:3", "LUK 18:4", "LUK 18:5", "LUK 18:6", "LUK 18:7", "LUK 18:8"],["PSA 145:18"], ["PSA 62:8"], ["PSA 103:13"]],
-      "prompt": "You are speaking to the one true God, your Father. How do you want to address him?"
+      "verses": [
+        [
+          "MAT 6:9a"
+        ]
+      ],
+      "related": [
+        [
+          "MAT 6:6"
+        ],
+        [
+          "MAT 6:7",
+          "MAT 6:8"
+        ],
+        [
+          "MRK 1:35"
+        ],
+        [
+          "JHN 4:23",
+          "JHN 4:24"
+        ],
+        [
+          "LUK 11:9",
+          "LUK 11:10",
+          "LUK 11:11",
+          "LUK 11:12",
+          "LUK 11:13"
+        ],
+        [
+          "LUK 18:1",
+          "LUK 18:2",
+          "LUK 18:3",
+          "LUK 18:4",
+          "LUK 18:5",
+          "LUK 18:6",
+          "LUK 18:7",
+          "LUK 18:8"
+        ],
+        [
+          "PSA 145:18"
+        ],
+        [
+          "PSA 62:8"
+        ],
+        [
+          "PSA 103:13"
+        ]
+      ],
+      "prompt": "You are speaking to the one true God, your Father. How do you want to address him?",
+      "guided": [
+        {
+          "q": "Jesus began with the words above. What words will you begin with?"
+        }
+      ]
     },
     {
       "name": "Honor his name",
-      "verses": [["MAT 6:9b"]],
-      "related": [["JHN 12:27", "JHN 12:28"], ["LUK 10:21"], ["JHN 11:41", "JHN 11:42"], ["MAT 22:37", "MAT 22:38"], ["JHN 17:1", "JHN 17:2", "JHN 17:3"], ["PSA 8:1"], ["PSA 103:1", "PSA 103:2", "PSA 103:3", "PSA 103:4", "PSA 103:5"],["PSA 100:4"]],
-      "prompt": "What about God do you honor or thank him for?"
+      "verses": [
+        [
+          "MAT 6:9b"
+        ]
+      ],
+      "related": [
+        [
+          "JHN 12:27",
+          "JHN 12:28"
+        ],
+        [
+          "LUK 10:21"
+        ],
+        [
+          "JHN 11:41",
+          "JHN 11:42"
+        ],
+        [
+          "MAT 22:37",
+          "MAT 22:38"
+        ],
+        [
+          "JHN 17:1",
+          "JHN 17:2",
+          "JHN 17:3"
+        ],
+        [
+          "PSA 8:1"
+        ],
+        [
+          "PSA 103:1",
+          "PSA 103:2",
+          "PSA 103:3",
+          "PSA 103:4",
+          "PSA 103:5"
+        ],
+        [
+          "PSA 100:4"
+        ]
+      ],
+      "prompt": "What about God do you honor or thank him for?",
+      "guided": [
+        {
+          "q": "Name one thing that is true about God that you honor.",
+          "cues": [
+            "who he is",
+            "what he has made",
+            "what he has said"
+          ]
+        },
+        {
+          "q": "Name one thing he has done that you thank him for today.",
+          "cues": [
+            "today",
+            "this week",
+            "your family",
+            "a prayer he answered"
+          ]
+        }
+      ]
     },
     {
       "name": "His kingdom and will",
-      "verses": [["MAT 6:10"]],
-      "related": [["MAT 6:33"], ["MAT 26:39"], ["MAT 9:37", "MAT 9:38"], ["MAT 7:21"], ["JHN 6:38"], ["PSA 143:10"], ["PSA 40:7", "PSA 40:8"]],
-      "prompt": "Where do you want his will done: in the world, your family, you?"
+      "verses": [
+        [
+          "MAT 6:10"
+        ]
+      ],
+      "related": [
+        [
+          "MAT 6:33"
+        ],
+        [
+          "MAT 26:39"
+        ],
+        [
+          "MAT 9:37",
+          "MAT 9:38"
+        ],
+        [
+          "MAT 7:21"
+        ],
+        [
+          "JHN 6:38"
+        ],
+        [
+          "PSA 143:10"
+        ],
+        [
+          "PSA 40:7",
+          "PSA 40:8"
+        ]
+      ],
+      "prompt": "Where do you want his will done: in the world, your family, you?",
+      "guided": [
+        {
+          "q": "Where do you want his kingdom to come and his will to be done? Name one place.",
+          "cues": [
+            "in you",
+            "your home",
+            "your work",
+            "your town",
+            "the world"
+          ]
+        },
+        {
+          "q": "Is there a decision in front of you? Ask for his will in it."
+        }
+      ]
     },
     {
       "name": "Daily bread",
-      "verses": [["MAT 6:11"]],
-      "related": [["MAT 6:31", "MAT 6:32"], ["MAT 7:7", "MAT 7:8", "MAT 7:9", "MAT 7:10", "MAT 7:11"], ["MAT 6:25", "MAT 6:26"],["JHN 6:35"], ["PSA 145:15", "PSA 145:16"], ["PSA 23:1"]],
-      "prompt": "What do you need for today? Who else needs provision?"
+      "verses": [
+        [
+          "MAT 6:11"
+        ]
+      ],
+      "related": [
+        [
+          "MAT 6:31",
+          "MAT 6:32"
+        ],
+        [
+          "MAT 7:7",
+          "MAT 7:8",
+          "MAT 7:9",
+          "MAT 7:10",
+          "MAT 7:11"
+        ],
+        [
+          "MAT 6:25",
+          "MAT 6:26"
+        ],
+        [
+          "JHN 6:35"
+        ],
+        [
+          "PSA 145:15",
+          "PSA 145:16"
+        ],
+        [
+          "PSA 23:1"
+        ]
+      ],
+      "prompt": "What do you need for today? Who else needs provision?",
+      "guided": [
+        {
+          "q": "What do you need today? Name it plainly.",
+          "cues": [
+            "food and home",
+            "work",
+            "health",
+            "strength for today"
+          ]
+        },
+        {
+          "q": "Who else needs something today? Name them.",
+          "cues": [
+            "family",
+            "a friend",
+            "someone who is sick",
+            "someone in need"
+          ]
+        }
+      ]
     },
     {
       "name": "Forgive us",
-      "verses": [["MAT 6:12"], ["MAT 6:14", "MAT 6:15"]],
-      "related": [["MRK 11:25"], ["MAT 18:21", "MAT 18:22"], ["MAT 5:44", "MAT 5:45"], ["LUK 18:9", "LUK 18:10", "LUK 18:11", "LUK 18:12", "LUK 18:13", "LUK 18:14"],["LUK 6:37"], ["LUK 23:34"], ["MAT 5:23", "MAT 5:24"], ["PSA 51:1", "PSA 51:2"], ["PSA 32:5"], ["PSA 103:12"]],
-      "prompt": "What do you need forgiveness for? Who do you need to forgive?"
+      "verses": [
+        [
+          "MAT 6:12"
+        ],
+        [
+          "MAT 6:14",
+          "MAT 6:15"
+        ]
+      ],
+      "related": [
+        [
+          "MRK 11:25"
+        ],
+        [
+          "MAT 18:21",
+          "MAT 18:22"
+        ],
+        [
+          "MAT 5:44",
+          "MAT 5:45"
+        ],
+        [
+          "LUK 18:9",
+          "LUK 18:10",
+          "LUK 18:11",
+          "LUK 18:12",
+          "LUK 18:13",
+          "LUK 18:14"
+        ],
+        [
+          "LUK 6:37"
+        ],
+        [
+          "LUK 23:34"
+        ],
+        [
+          "MAT 5:23",
+          "MAT 5:24"
+        ],
+        [
+          "PSA 51:1",
+          "PSA 51:2"
+        ],
+        [
+          "PSA 32:5"
+        ],
+        [
+          "PSA 103:12"
+        ]
+      ],
+      "prompt": "What do you need forgiveness for? Who do you need to forgive?",
+      "guided": [
+        {
+          "q": "What do you need to ask forgiveness for?",
+          "cues": [
+            "something you did",
+            "something you said",
+            "something you left undone"
+          ]
+        },
+        {
+          "q": "Who do you need to forgive? Name them."
+        }
+      ]
     },
     {
       "name": "Keep us and deliver us",
-      "verses": [["MAT 6:13a"]],
-      "related": [["MAT 26:40", "MAT 26:41"], ["JHN 17:15"], ["LUK 22:31", "LUK 22:32"],["JHN 16:33"], ["PSA 121:7", "PSA 121:8"], ["PSA 46:1"]],
+      "verses": [
+        [
+          "MAT 6:13a"
+        ]
+      ],
+      "related": [
+        [
+          "MAT 26:40",
+          "MAT 26:41"
+        ],
+        [
+          "JHN 17:15"
+        ],
+        [
+          "LUK 22:31",
+          "LUK 22:32"
+        ],
+        [
+          "JHN 16:33"
+        ],
+        [
+          "PSA 121:7",
+          "PSA 121:8"
+        ],
+        [
+          "PSA 46:1"
+        ]
+      ],
       "prompt": "Where do you need strength or protection?",
-      "note": "The World English Bible prints one more sentence in this verse, with a footnote that some Greek texts omit it. It is not shown here."
+      "note": "The World English Bible prints one more sentence in this verse, with a footnote that some Greek texts omit it. It is not shown here.",
+      "guided": [
+        {
+          "q": "What is tempting you right now?",
+          "cues": [
+            "at home",
+            "at work",
+            "when you are alone",
+            "when you are tired or angry"
+          ]
+        },
+        {
+          "q": "What do you need to be delivered from?",
+          "cues": [
+            "a fear",
+            "a habit",
+            "a danger"
+          ]
+        }
+      ]
     },
     {
       "name": "Close",
-      "verses": [["JHN 14:13", "JHN 14:14"], ["JHN 16:23", "JHN 16:24"]],
-      "related": [["JHN 15:7"], ["JHN 15:16"], ["MAT 18:19", "MAT 18:20"], ["MAT 21:22"], ["PSA 19:14"]],
-      "prompt": "Anything to say to close? (Optional)"
+      "verses": [
+        [
+          "JHN 14:13",
+          "JHN 14:14"
+        ],
+        [
+          "JHN 16:23",
+          "JHN 16:24"
+        ]
+      ],
+      "related": [
+        [
+          "JHN 15:7"
+        ],
+        [
+          "JHN 15:16"
+        ],
+        [
+          "MAT 18:19",
+          "MAT 18:20"
+        ],
+        [
+          "MAT 21:22"
+        ],
+        [
+          "PSA 19:14"
+        ]
+      ],
+      "prompt": "Anything to say to close? (Optional)",
+      "guided": [
+        {
+          "q": "How will you close your prayer?"
+        }
+      ]
     }
   ],
   "prayer": {
@@ -103,6 +471,10 @@
     "copy": "Copy",
     "copied": "Copied to your clipboard.",
     "copyFailed": "Could not copy. Select the text and copy it by hand.",
+    "share": "Share",
+    "save": "Save as a file",
+    "saved": "Saved to your downloads.",
+    "fileName": "prayer",
     "print": "Print",
     "aloud": "Pray it aloud (large text)",
     "aloudHeading": "Your prayer",

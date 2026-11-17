@@ -10,6 +10,10 @@ The words of Jesus for this step (always shown):
 
 Question: *You are speaking to the one true God, your Father. How do you want to address him?*
 
+Guided questions:
+
+- *Jesus began with the words above. What words will you begin with?*
+
 Rotating pool (9 entries, 2 shown per day):
 
 - **Matthew 6:6** — But you, when you pray, enter into your inner room, and having shut your door, pray to your Father who is in secret; and your Father who sees in secret will reward you openly.
@@ -30,6 +34,11 @@ The words of Jesus for this step (always shown):
 
 Question: *What about God do you honor or thank him for?*
 
+Guided questions:
+
+- *Name one thing that is true about God that you honor.* (Think about: who he is, what he has made, what he has said)
+- *Name one thing he has done that you thank him for today.* (Think about: today, this week, your family, a prayer he answered)
+
 Rotating pool (8 entries, 2 shown per day):
 
 - **John 12:27-28** — “Now my soul is troubled. What shall I say? ‘Father, save me from this time’? But I came to this time for this cause. Father, glorify your name!” Then a voice came out of the sky, saying, “I have both glorified it and will glorify it again.”
@@ -49,6 +58,11 @@ The words of Jesus for this step (always shown):
 
 Question: *Where do you want his will done: in the world, your family, you?*
 
+Guided questions:
+
+- *Where do you want his kingdom to come and his will to be done? Name one place.* (Think about: in you, your home, your work, your town, the world)
+- *Is there a decision in front of you? Ask for his will in it.*
+
 Rotating pool (7 entries, 2 shown per day):
 
 - **Matthew 6:33** — But seek first God’s Kingdom and his righteousness; and all these things will be given to you as well.
@@ -67,6 +81,11 @@ The words of Jesus for this step (always shown):
 
 Question: *What do you need for today? Who else needs provision?*
 
+Guided questions:
+
+- *What do you need today? Name it plainly.* (Think about: food and home, work, health, strength for today)
+- *Who else needs something today? Name them.* (Think about: family, a friend, someone who is sick, someone in need)
+
 Rotating pool (6 entries, 2 shown per day):
 
 - **Matthew 6:31-32** — “Therefore don’t be anxious, saying, ‘What will we eat?’, ‘What will we drink?’ or, ‘With what will we be clothed?’ For the Gentiles seek after all these things; for your heavenly Father knows that you need all these things.
@@ -84,6 +103,11 @@ The words of Jesus for this step (always shown):
 - **Matthew 6:14-15** — “For if you forgive men their trespasses, your heavenly Father will also forgive you. But if you don’t forgive men their trespasses, neither will your Father forgive your trespasses.
 
 Question: *What do you need forgiveness for? Who do you need to forgive?*
+
+Guided questions:
+
+- *What do you need to ask forgiveness for?* (Think about: something you did, something you said, something you left undone)
+- *Who do you need to forgive? Name them.*
 
 Rotating pool (10 entries, 2 shown per day):
 
@@ -106,6 +130,11 @@ The words of Jesus for this step (always shown):
 
 Question: *Where do you need strength or protection?*
 
+Guided questions:
+
+- *What is tempting you right now?* (Think about: at home, at work, when you are alone, when you are tired or angry)
+- *What do you need to be delivered from?* (Think about: a fear, a habit, a danger)
+
 Our note: The World English Bible prints one more sentence in this verse, with a footnote that some Greek texts omit it. It is not shown here.
 
 Rotating pool (6 entries, 2 shown per day):
@@ -125,6 +154,10 @@ The words of Jesus for this step (always shown):
 - **John 16:23-24** — “In that day you will ask me no questions. Most certainly I tell you, whatever you may ask of the Father in my name, he will give it to you. Until now, you have asked nothing in my name. Ask, and you will receive, that your joy may be made full.
 
 Question: *Anything to say to close? (Optional)*
+
+Guided questions:
+
+- *How will you close your prayer?*
 
 Rotating pool (5 entries, 2 shown per day):
 

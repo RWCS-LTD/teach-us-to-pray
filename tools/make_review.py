@@ -33,6 +33,12 @@ out = [f"# Content review: {L['app']['name']} ({L['meta']['languageName']})", ""
 for i, step in enumerate(L["steps"], 1):
     out += [f"## Step {i}: {step['name']}", "", "The words of Jesus for this step (always shown):", "",
             *[quote(g) for g in step["verses"]], "", f"Question: *{step['prompt']}*", ""]
+    if step.get("guided"):
+        out += ["Guided questions:", ""]
+        for item in step["guided"]:
+            cues = f" (Think about: {', '.join(item['cues'])})" if item.get("cues") else ""
+            out += [f"- *{item['q']}*{cues}"]
+        out += [""]
     if step.get("note"):
         out += [f"Our note: {step['note']}", ""]
     out += [f"Rotating pool ({len(step['related'])} entries, {L['step']['perDay']} shown per day):", ""]

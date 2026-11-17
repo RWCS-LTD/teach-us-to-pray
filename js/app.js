@@ -15,6 +15,8 @@
   let L;            // language strings
   let S;            // scripture document
   let answers = []; // the person's own words, one entry per step
+  let parts = [];   // guided mode: the words typed under each short question, per step
+  let mode = 'guided'; // 'guided' (short questions) or 'open' (one box per step)
   let keep = false; // "keep my draft on this device"
   let flash = '';   // one-time status message for the next render
 
@@ -56,15 +58,19 @@
 
   function loadDraft() {
     try {
-      const saved = JSON.parse(localStorage.getItem(DRAFT_KEY));
-      if (!Array.isArray(saved)) return;
-      answers = answers.map((_, i) => (typeof saved[i] === 'string' ? saved[i] : ''));
+      let saved = JSON.parse(localStorage.getItem(DRAFT_KEY));
+      if (Array.isArray(saved)) saved = { answers: saved, mode: 'open' }; // first version stored a plain list
+      if (!saved || !Array.isArray(saved.answers)) return;
+      const text = (v) => (typeof v === 'string' ? v : '');
+      answers = answers.map((_, i) => text(saved.answers[i]));
+      parts = parts.map((list, i) => list.map((_, k) => text(((saved.parts || [])[i] || [])[k])));
+      mode = saved.mode === 'open' ? 'open' : 'guided';
       keep = true;
     } catch (e) { /* storage unavailable: carry on without it */ }
   }
   function saveDraft() {
     if (!keep) return;
-    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(answers)); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ mode, answers, parts })); } catch (e) { /* ignore */ }
   }
   function forgetDraft() {
     try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
@@ -80,6 +86,7 @@
       onclick: () => {
         if (!window.confirm(L.draft.eraseConfirm)) return;
         answers = answers.map(() => '');
+        parts = parts.map((list) => list.map(() => ''));
         forgetDraft();
         saveDraft();
         flash = L.draft.erased;
@@ -104,12 +111,22 @@
         h('h1', null, L.welcome.heading),
         L.welcome.verses.map((r) => passage([r])),
         paragraphs(L.welcome.body),
-        h('div', { class: 'actions' },
-          h('a', { class: 'btn primary grow', href: '#/step/1' }, L.nav.start)),
+        h('h2', null, L.mode.heading),
+        h('div', { class: 'choices' },
+          modeChoice('guided', L.mode.guided, L.mode.guidedHint, 'primary'),
+          modeChoice('open', L.mode.open, L.mode.openHint, '')),
         h('p', null, h('a', { href: '#/why' }, L.welcome.whyLink)),
         draftSection(),
       ],
     };
+  }
+
+  // A large button on the welcome screen that picks how to pray and starts.
+  function modeChoice(value, label, hint, extraClass) {
+    return h('a', {
+      class: 'btn choice ' + extraClass, href: '#/step/1',
+      onclick: () => { mode = value; saveDraft(); },
+    }, h('strong', null, label), h('span', null, hint));
   }
 
   function whyView() {
@@ -148,13 +165,42 @@
     const nextLabel = () => (n === total ? L.nav.finish : answers[i].trim() ? L.nav.next : L.nav.skip);
     const next = h('a', { class: 'btn primary grow', href: n < total ? '#/step/' + (n + 1) : '#/prayer' }, nextLabel());
 
-    // The box always starts with the person's own words or nothing at all.
+    // Every box starts with the person's own words or nothing at all.
     // Spell-check is off so that no browser service is sent what is typed.
-    const box = h('textarea', {
-      id: 'words', rows: '6', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'words-hint',
-      oninput: (e) => { answers[i] = e.target.value; next.textContent = nextLabel(); saveDraft(); },
-    });
-    box.value = answers[i];
+    const guided = mode === 'guided' && step.guided;
+    const joined = () => parts[i].filter((t) => t.trim()).join('\n');
+    let ask;
+    if (guided) {
+      // If the words were changed in the single box, keep them all: put them in the first short box.
+      if (joined() !== answers[i]) parts[i] = parts[i].map((_, k) => (k ? '' : answers[i]));
+      ask = step.guided.map((item, k) => {
+        const box = h('textarea', {
+          id: 'words-' + k, class: 'short', rows: '3', autocomplete: 'off', spellcheck: 'false',
+          'aria-describedby': (item.cues ? 'cues-' + k + ' ' : '') + 'words-hint',
+          oninput: (e) => { parts[i][k] = e.target.value; answers[i] = joined(); next.textContent = nextLabel(); saveDraft(); },
+        });
+        box.value = parts[i][k];
+        return h('div', { class: 'ask' },
+          h('label', { for: 'words-' + k }, item.q),
+          item.cues && h('p', { class: 'cues', id: 'cues-' + k }, L.step.cuesLabel + ': ' + item.cues.join(' \u00b7 ')),
+          box);
+      });
+      ask.push(h('p', { class: 'hint', id: 'words-hint' }, L.step.guidedHint));
+    } else {
+      const box = h('textarea', {
+        id: 'words', rows: '6', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'words-hint',
+        oninput: (e) => { answers[i] = e.target.value; next.textContent = nextLabel(); saveDraft(); },
+      });
+      box.value = answers[i];
+      ask = h('div', { class: 'ask' },
+        h('label', { for: 'words' }, step.prompt),
+        h('p', { class: 'hint', id: 'words-hint' }, L.step.inputHint),
+        box);
+    }
+    const switchMode = step.guided && h('button', {
+      type: 'button', class: 'link',
+      onclick: () => { mode = guided ? 'open' : 'guided'; saveDraft(); render(false); },
+    }, guided ? L.mode.toOpen : L.mode.toGuided);
 
     return {
       title: progress + ': ' + step.name,
@@ -168,10 +214,9 @@
         step.note && h('p', { class: 'note' }, h('strong', null, L.app.ourNoteLabel + ': '), step.note),
         today.length > 0 && [h('h2', null, L.step.relatedHeading), today.map((g) => passage(g))],
         rest.length > 0 && h('details', null, h('summary', null, L.step.moreLink), rest.map((g) => passage(g))),
-        h('div', { class: 'ask' },
-          h('label', { for: 'words' }, step.prompt),
-          h('p', { class: 'hint', id: 'words-hint' }, L.step.inputHint),
-          box),
+        ask,
+        h('p', { class: 'say' }, L.step.sayAloud),
+        switchMode,
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: n > 1 ? '#/step/' + (n - 1) : '#/' }, L.nav.back),
           next),
@@ -191,6 +236,19 @@
     return ok;
   }
 
+  // Save the prayer as a dated text file. The file is made in the browser; nothing is sent anywhere.
+  function saveFile(text) {
+    const d = new Date();
+    const two = (n) => String(n).padStart(2, '0');
+    const name = L.prayer.fileName + '-' + d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()) + '.txt';
+    const url = URL.createObjectURL(new Blob([text.replace(/\r?\n/g, '\r\n')], { type: 'text/plain;charset=utf-8' }));
+    const link = h('a', { href: url, download: name, class: 'offscreen' });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   function prayerView() {
     const parts = written();
     const nodes = [h('h1', null, L.prayer.heading)];
@@ -208,6 +266,15 @@
             type: 'button', class: 'btn primary',
             onclick: async () => { status.textContent = (await copyText(parts.join('\n\n'))) ? L.prayer.copied : L.prayer.copyFailed; },
           }, L.prayer.copy),
+          // Share opens the device's own share sheet; the person chooses where the words go.
+          navigator.share && h('button', {
+            type: 'button', class: 'btn',
+            onclick: () => { navigator.share({ text: parts.join('\n\n') }).catch(() => {}); },
+          }, L.prayer.share),
+          h('button', {
+            type: 'button', class: 'btn',
+            onclick: () => { saveFile(parts.join('\n\n')); status.textContent = L.prayer.saved; },
+          }, L.prayer.save),
           h('button', { type: 'button', class: 'btn', onclick: () => window.print() }, L.prayer.print),
           h('a', { class: 'btn', href: '#/aloud' }, L.prayer.aloud),
           h('a', { class: 'btn', href: '#/step/1' }, L.prayer.edit)),
@@ -287,6 +354,7 @@
     skip.addEventListener('click', (e) => { e.preventDefault(); main.focus(); });
 
     answers = L.steps.map(() => '');
+    parts = L.steps.map((st) => (st.guided || []).map(() => ''));
     loadDraft();
     window.addEventListener('hashchange', () => render(true));
     render(false);
