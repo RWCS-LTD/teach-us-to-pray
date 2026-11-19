@@ -123,6 +123,29 @@ h2.small { margin: .9rem 0 .4rem; font-size: .9rem; }
 .aloud { font-size: clamp(1.6rem, 6vw, 2.4rem); line-height: 1.45; }
 .aloud p { margin-bottom: 1.5em; }
 
+.prayer .cite, .aloud .cite { margin-top: -.5em; color: var(--muted); font-size: .9rem; }
+.aloud .cite { font-size: 1rem; }
+
+/* Choosing how to pray */
+.choices { display: grid; gap: .6rem; margin: .5rem 0 1.25rem; }
+@media (min-width: 34rem) { .choices { grid-template-columns: 1fr 1fr; } }
+.btn.choice { flex-direction: column; align-items: flex-start; gap: .15rem; padding: .85rem 1.1rem; text-align: left; }
+.btn.choice strong { font-size: 1.15rem; }
+.btn.choice span { font-weight: 400; }
+
+/* Share Jesus: held between two people */
+body.together { font-size: 1.15rem; }
+body.together .verse blockquote { font-size: 1.25rem; }
+.small-label { margin: 0 0 .25rem; color: var(--muted); font-size: .95rem; }
+.say-aloud { font-size: 1.35rem; font-weight: 600; line-height: 1.35; }
+.phrase { font-size: clamp(2rem, 9vw, 3.2rem); line-height: 1.3; min-height: 40vh; display: flex; flex-direction: column; justify-content: center; }
+.phrase p { margin-bottom: .5em; }
+.leader-line { color: var(--muted); font-size: .95rem; }
+.borrowed { margin-bottom: 1.25rem; }
+.next-steps { padding-left: 1.4rem; }
+.next-steps li { margin-bottom: 1rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
 .draft { margin-top: 2.5rem; padding-top: .25rem; border-top: 1px solid var(--line); }
 .check { display: flex; align-items: flex-start; gap: .6rem; min-height: 2.75rem; padding: .4rem 0; font-weight: 600; }
 .check input { width: 1.4rem; height: 1.4rem; margin: .15rem 0 0; flex: none; accent-color: var(--accent); }

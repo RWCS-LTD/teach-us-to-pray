@@ -7,8 +7,10 @@
 5. No shipped file contains the doxology, cookie code, or an outside address to load.
 6. Every excerpt the app shows has balanced quotation marks once trimmed by the
    same rule as trimQuotes in js/app.js. The one exception is a speech that
-   begins partway into an excerpt and runs on past it. Use --quotes to print every excerpt the
-   rule changes, before and after.
+   begins partway into an excerpt and runs on past it, plus the excerpts listed in
+   AS_IN_SOURCE. Use --quotes to print every excerpt the rule changes, before and after.
+7. The language file never uses a fixed prayer or declares anyone saved (NEVER_SAY).
+8. No question in a prayer step invites a bare yes or no.
 """
 import json
 import pathlib
@@ -44,9 +46,10 @@ def strays(t):
 
 
 def trim_quotes(t):
-    """Same rule as trimQuotes in js/app.js: drop an unmatched mark at the very start or end of the excerpt."""
+    """Same rule as trimQuotes in js/app.js: drop an unmatched mark (double or single) at the
+    very start or end of the excerpt, and a single mark touching a dropped double mark."""
     stray_d, stray_s = strays(t)
-    drop = {i for i in stray_d if i in (0, len(t) - 1)}
+    drop = {i for i in stray_d | stray_s if i in (0, len(t) - 1)}
     for i in list(drop):
         if t[i] == "“" and i + 1 in stray_s:
             drop.add(i + 1)
@@ -61,7 +64,20 @@ def balanced(t):
     stray_d, stray_s = strays(t)
     allowed_d = {i for i in stray_d if t[i] == "“" and i > 0}
     allowed_s = {i + 1 for i in allowed_d if t[i + 1:i + 2] == "‘"}
+    # An apostrophe after a word that ends in s (the apostles’ teaching) is not a quotation mark.
+    allowed_s |= {i for i in stray_s if t[i] == "’" and 0 < i < len(t) - 1 and t[i - 1] == "s" and t[i + 1] == " "}
     return stray_d <= allowed_d and stray_s <= allowed_s
+
+
+# Excerpts shown exactly as the source has them although a mark stays unmatched.
+# Decided at content review (2026-11-18): show Matthew 28:20 accurately.
+AS_IN_SOURCE = {
+    ("MAT 28:20b",): "the WEB closes Jesus' words, then adds \"Amen.\"",
+}
+
+# Words the app must never say: no fixed prayer, nothing that declares anyone's standing.
+NEVER_SAY = ["sinner's prayer", "sinner’s prayer", "you are saved", "you are now saved",
+             "you're saved", "welcome to the family", "now you are a christian"]
 
 
 def excerpts(L):
@@ -69,10 +85,19 @@ def excerpts(L):
     yield from ([r] for r in L["welcome"]["verses"])
     yield from (s["verses"] for s in L["why"]["sections"])
     yield L["guide"]["introVerses"]
-    for st in L["steps"]:
+    for st in L["steps"] + L["lead"]["steps"]:
         yield from st["verses"]
-        yield from st["related"]
+        yield from st.get("related", [])
         yield from (q["example"] for q in st["guided"] if q.get("example"))
+    lead = L["lead"]
+    yield from lead["start"]["verses"]
+    yield from lead["cost"]["verses"]
+    yield from lead["cost"]["extraVerses"]
+    yield from ([r] for r in lead["borrow"]["prayers"])
+    for sec in lead["after"]["sections"]:
+        yield from sec["verses"]
+    for item in lead["after"]["next"]:
+        yield from item["verses"]
 
 # 1
 r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_scripture.py"), "--check", *ARGS],
@@ -105,9 +130,21 @@ for lang_file in sorted((ROOT / "lang").glob("*.json")):
             if SHOW_QUOTES:
                 sys.stdout.reconfigure(encoding="utf-8")
                 print(f"\n{label}\n  before: {before}\n  after:  {after}")
-        if not balanced(after):
+        if not balanced(after) and tuple(group) not in AS_IN_SOURCE:
             problems.append(f"{lang_file.name}: unbalanced quotation marks in {label}: {after}")
     print(f"{lang_file.name}: quotation marks trimmed in {changed} excerpts")
+
+    # 7
+    lower = text.lower()
+    said = [w for w in NEVER_SAY if w in lower]
+    if said:
+        problems.append(f"{lang_file.name}: must never say {said}")
+    # 8: a question whose answer becomes part of a prayer must not invite a bare yes or no
+    yes_no = re.compile(r"^(is|are|do|does|did|have|has|can|will|would|could|should)\b", re.I)
+    for st in L["steps"] + L["lead"]["steps"]:
+        for q in st["guided"]:
+            if yes_no.match(q["q"]):
+                problems.append(f"{lang_file.name}: yes/no question in a prayer step: {q['q']}")
 
 # 3 and 4
 shipped = [ROOT / f for f in SHIPPED_FILES] + [p for d in SHIPPED_DIRS for p in (ROOT / d).rglob("*") if p.is_file()]

@@ -17,7 +17,17 @@
     "MRK": "Mark",
     "LUK": "Luke",
     "JHN": "John",
-    "PSA": "Psalm"
+    "PSA": "Psalm",
+    "ACT": "Acts",
+    "ROM": "Romans",
+    "1CO": "1 Corinthians",
+    "2CO": "2 Corinthians",
+    "EPH": "Ephesians",
+    "PHP": "Philippians",
+    "HEB": "Hebrews",
+    "JAS": "James",
+    "1PE": "1 Peter",
+    "1JN": "1 John"
   },
   "nav": {
     "about": "About and privacy",
@@ -61,7 +71,11 @@
       "Each step shows the words of Jesus and asks you a question.",
       "You answer in your own words. The app never writes a prayer for you."
     ],
-    "begin": "Begin",
+    "choose": "How would you like to pray?",
+    "byMyself": "Pray by myself",
+    "byMyselfHint": "A guided prayer in your own words. About 10 minutes.",
+    "withSomeone": "Share Jesus",
+    "withSomeoneHint": "Guide someone who is ready to turn to Jesus as they pray in their own words.",
     "whyLink": "Why we pray this way (Matthew 6:5-8)"
   },
   "why": {
@@ -499,6 +513,137 @@
       ]
     }
   ],
+  "lead": {
+    "name": "Share Jesus",
+    "start": {
+      "name": "Before you begin",
+      "verses": [["JHN 6:44"], ["ACT 8:30", "ACT 8:31"], ["1CO 3:6", "1CO 3:7"]],
+      "note": "This is a conversation, not a script. The Father draws people to Jesus, so there is no need to push. Sit where you can both see the screen. Read each passage together, ask each question gently, listen, and type what they say in their own words. They may stop at any time.",
+      "askLabel": "Ask them",
+      "ask": "Do you understand what you are about to say to God?",
+      "next": "Begin"
+    },
+    "cost": {
+      "name": "Count the cost",
+      "intro": "Read these together.",
+      "verses": [["LUK 14:28"], ["LUK 9:23"], ["JHN 16:33a"]],
+      "extraNote": "Jesus said this to prepare people, not to discourage them.",
+      "extraVerses": [["LUK 8:13"]],
+      "ask": "Jesus told people this at the start. Do you want to keep going?",
+      "yes": "Yes, keep going",
+      "no": "Not today"
+    },
+    "notToday": {
+      "heading": "That is all right.",
+      "note": "No one should be rushed. Thank them, stay their friend, and keep praying for them.",
+      "home": "Back to the start"
+    },
+    "ideasLabel": "Ideas you may mention",
+    "hint": "Type what they say, in their own words. You may leave this blank.",
+    "needHelp": "They need help finding words",
+    "steps": [
+      {
+        "name": "Who Jesus is",
+        "verses": [["ROM 10:9", "ROM 10:10"], ["1CO 15:3", "1CO 15:4"], ["JHN 3:16"]],
+        "guided": [
+          {
+            "q": "Speak to the Father now. Tell him, in your own words, who you believe Jesus is.",
+            "cues": ["he died for our sins", "God raised him from the dead", "he is Lord"]
+          }
+        ]
+      },
+      {
+        "name": "Being honest with God",
+        "verses": [["LUK 18:13"], ["MRK 1:15"], ["1JN 1:9"]],
+        "guided": [
+          {
+            "q": "Tell him honestly what you have done wrong, or how you have lived without him, that you want to turn from."
+          }
+        ]
+      },
+      {
+        "name": "Following him",
+        "verses": [["MRK 1:17"], ["LUK 9:23"]],
+        "guided": [
+          {
+            "q": "If you are ready to turn from that and follow Jesus, tell him so in your own words."
+          }
+        ]
+      },
+      {
+        "name": "Asking",
+        "verses": [["LUK 11:13"], ["LUK 23:42"]],
+        "guided": [
+          {
+            "q": "Ask him for what you need as you begin to follow him.",
+            "cues": ["forgiveness", "his help to follow him", "his Spirit", "strength for the days ahead"]
+          }
+        ]
+      }
+    ],
+    "borrow": {
+      "name": "Words to borrow",
+      "note": "These are prayers from Scripture. Use any of them as your own.",
+      "prayers": ["LUK 18:13b", "LUK 23:42b", "MRK 9:24b"],
+      "use": "Use these words",
+      "done": "Done"
+    },
+    "review": {
+      "heading": "Read it through together",
+      "hint": "Read it slowly, as if you are speaking to him. Change any words that are not true or do not sound like them, and join any words that run together.",
+      "lineHint": "To make a phrase shorter, start a new line.",
+      "borrowedHeading": "Words from Scripture",
+      "remove": "Remove",
+      "empty": "There are no words to pray yet.",
+      "toBorrow": "Words to borrow",
+      "toWalk": "Pray it together"
+    },
+    "walk": {
+      "progress": "Phrase {n} of {total}",
+      "leaderLine": "Read this phrase, then let them repeat it.",
+      "finish": "Finish"
+    },
+    "prayer": {
+      "heading": "Their prayer",
+      "intro": "The prayer in their own words.",
+      "next": "What comes next"
+    },
+    "after": {
+      "heading": "After the prayer",
+      "sections": [
+        {
+          "heading": "Grace, not the words",
+          "verses": [["EPH 2:8", "EPH 2:9"]],
+          "note": "What matters is Jesus, not the exact words."
+        },
+        {
+          "heading": "His promises",
+          "verses": [["JHN 16:33b"], ["JHN 10:27", "JHN 10:28", "JHN 10:29"], ["PHP 1:6"], ["MAT 28:20b"], ["ROM 8:38", "ROM 8:39"], ["HEB 13:5"]]
+        },
+        {
+          "heading": "When it gets hard",
+          "verses": [["MAT 7:24", "MAT 7:25", "MAT 7:26", "MAT 7:27"], ["1PE 4:12"], ["JAS 1:2", "JAS 1:3", "JAS 1:4"], ["1CO 10:13"]]
+        },
+        {
+          "heading": "When you fail",
+          "verses": [["1JN 1:9"]]
+        },
+        {
+          "heading": "Feelings are not the test",
+          "verses": [["2CO 5:7"]]
+        }
+      ],
+      "nextHeading": "Next steps",
+      "next": [
+        { "text": "Be baptized.", "verses": [["ACT 2:38"], ["MAT 28:19"]] },
+        { "text": "Read the Gospel of John, and pray each day.", "verses": [] },
+        { "text": "Stay close to other believers.", "verses": [["HEB 10:24", "HEB 10:25"], ["ACT 2:42"]] },
+        { "text": "When it gets hard, tell the person who prayed with you.", "verses": [] }
+      ],
+      "leaderNote": "Follow up with them within a few days.",
+      "home": "Back to the start"
+    }
+  },
   "prayer": {
     "heading": "Your prayer",
     "intro": "Your prayer for today, in your own words.",
@@ -543,7 +688,7 @@
       "Scripture quotations are from the World English Bible (WEB), which is in the public domain. The text was taken from eBible.org. \"World English Bible\" is a trademark of eBible.org.",
       "Where a reference ends in \"a\" or \"b\", only that part of the verse is shown. The words shown are unchanged.",
       "Where an excerpt begins or ends partway through a speech, the quotation mark that opens or closes that speech elsewhere is not shown at the start or end of the excerpt.",
-      "The app adds no teaching of its own. The only words that are ours are the step names, headings and buttons, the questions, the short \"Think about\" prompts under them, the start screen, the instruction on the read-through screen, the reminders to pray out loud, and this page."
+      "The app adds no teaching of its own. The only words that are ours are the step names, headings and buttons, the questions, the short \"Think about\" prompts under them, the start screen, the instruction on the read-through screen, the reminders to pray out loud, and this page. In \"Share Jesus\", the leader notes, the questions and ideas, the instructions on the read-through and phrase screens, and the next steps are ours too."
     ],
     "doxologyHeading": "Matthew 6:13",
     "doxology": "The World English Bible prints one more sentence at the end of Matthew 6:13, with a footnote that some Greek texts omit it. This app does not show that sentence.",
@@ -555,7 +700,8 @@
     "how": [
       "There are seven steps, in the order Jesus gave. Each step shows his words and asks you one short question at a time. Most questions show a short prayer from Scripture, and each step offers other passages of Scripture that change each day.",
       "Before you pray, you read your whole prayer through in one place and change anything that is not true or does not sound like you. Then you pray it out loud, one part at a time.",
-      "At the end you see your prayer in your own words. The app never writes a prayer for you, and it never changes your words."
+      "At the end you see your prayer in your own words. The app never writes a prayer for you, and it never changes your words.",
+      "\"Share Jesus\" helps a believer guide someone who is ready to turn to Jesus. It shows Scripture, asks a few questions, and ends with a prayer in that person's own words, said aloud phrase by phrase. The app never writes the prayer, never says that saying it saves anyone, and never keeps their words on the device."
     ]
   }
 }

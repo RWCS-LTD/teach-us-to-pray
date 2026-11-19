@@ -4,6 +4,7 @@
  * language file and the Scripture file) and then makes no further requests.
  * What a person writes is held in memory only, unless they switch on
  * "keep my draft on this device", which uses this browser's localStorage.
+ * Words typed in "Share Jesus" are never stored, whatever that setting is.
  */
 (() => {
   'use strict';
@@ -14,12 +15,11 @@
 
   let L;            // language strings
   let S;            // scripture document
-  let answers = []; // the person's own words, one entry per step
-  let parts = [];   // the words typed under each short question, per step
-  let keep = false; // "keep my draft on this device"
+  let PRAY;         // "Pray by myself": the guided prayer
+  let LEAD;         // "Share Jesus": a leader guiding someone else
+  let keep = false; // "keep my draft on this device" (Pray by myself only)
   let flash = '';   // one-time status message for the next render
-  let prayerDay = null;     // the day fixed when the person taps Begin (memory only)
-  const edited = new Set(); // steps changed on the read-through screen this visit
+  let prayerDay = null; // the day fixed when the person taps Begin (memory only)
 
   const main = document.getElementById('main');
 
@@ -34,7 +34,7 @@
       else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
       else el.setAttribute(k, v === true ? '' : v);
     }
-    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) el.append(kid);
     return el;
   }
 
@@ -49,8 +49,8 @@
   // the very start or very end of the excerpt is not shown. An unmatched opening mark
   // further in (after "said,") stays, so the reader sees where the speaker begins.
   // Only marks are removed, never words. A single mark goes only when it is unmatched
-  // and touches a removed double mark, because the closing single mark is also the
-  // apostrophe. tools/verify.py applies the same rule and checks every excerpt.
+  // and is at the very edge, or touches a removed double mark, because the closing
+  // single mark is also the apostrophe. tools/verify.py applies the same rule.
   function trimQuotes(t) {
     const letter = (c) => /\p{L}/u.test(c || '');
     const strayDouble = new Set();
@@ -69,7 +69,7 @@
     openD.forEach((i) => strayDouble.add(i));
     openS.forEach((i) => straySingle.add(i));
     const atEdge = (i) => i === 0 || i === t.length - 1;
-    const drop = new Set([...strayDouble].filter(atEdge));
+    const drop = new Set([...strayDouble, ...straySingle].filter(atEdge));
     for (const i of [...drop]) {
       if (t[i] === '“' && straySingle.has(i + 1)) drop.add(i + 1);
       if (t[i] === '”' && straySingle.has(i - 1)) drop.add(i - 1);
@@ -77,17 +77,60 @@
     return t.split('').filter((_, i) => !drop.has(i)).join('');
   }
 
-  // A passage of Scripture with its reference. The text comes only from the Scripture file.
+  // The text of a group of verses, exactly as shown. It comes only from the Scripture file.
+  const scripture = (group) => trimQuotes(group.map((r) => S.verses[r]).join(' '));
+  const cite = (group) => refLabel(group) + ' · ' + S.abbreviation;
+
+  // A passage of Scripture with its reference.
   function passage(group, extraClass) {
     return h('figure', { class: 'verse' + (extraClass ? ' ' + extraClass : '') },
-      h('blockquote', null, h('p', null, trimQuotes(group.map((r) => S.verses[r]).join(' ')))),
-      h('figcaption', null, refLabel(group) + ' · ' + S.abbreviation));
+      h('blockquote', null, h('p', null, scripture(group))),
+      h('figcaption', null, cite(group)));
   }
 
   const paragraphs = (list) => list.map((t) => h('p', null, t));
-  const written = () => answers.filter((a) => a.trim());
+  const ourNote = (text) => text && h('p', { class: 'note' }, h('strong', null, L.app.ourNoteLabel + ': '), text);
 
-  /* ---------- optional draft on this device ---------- */
+  /* ---------- the two ways through the app ---------- */
+
+  // A flow holds one set of steps, the words typed for them, and where its screens live.
+  function makeFlow(steps, opts) {
+    return Object.assign({
+      steps,
+      answers: steps.map(() => ''),               // one entry per step, the person's own words
+      parts: steps.map((st) => st.guided.map(() => '')), // the words typed under each question
+      edited: new Set(),                          // steps changed on the read-through this visit
+      borrowed: [],                               // Scripture prayers chosen to pray (Share Jesus)
+    }, opts);
+  }
+
+  function resetFlow(F) {
+    F.answers = F.steps.map(() => '');
+    F.parts = F.steps.map((st) => st.guided.map(() => ''));
+    F.edited.clear();
+    F.borrowed = [];
+  }
+
+  // The prayer in order: each answered step, then any Scripture prayer chosen to borrow.
+  // Nothing else is added: no opening, no closing, no "Amen".
+  function prayerParts(F) {
+    const own = F.steps.map((st, i) => ({ name: st.name, text: F.answers[i] })).filter((p) => p.text.trim());
+    const lent = F.borrowed.map((r) => ({ name: refLabel([r]), text: scripture([r]), ref: [r] }));
+    return own.concat(lent);
+  }
+  const anyWords = () => prayerParts(PRAY).length > 0 || prayerParts(LEAD).length > 0;
+  // Plain text of the prayer, for Copy, Share and Save. Borrowed Scripture keeps its reference.
+  const plain = (list) => list.map((p) => (p.ref ? p.text + '\n(' + cite(p.ref) + ')' : p.text)).join('\n\n');
+
+  // Split only where the words already have punctuation (. , ; ? !) or a line break.
+  // The words themselves are not changed; only the spaces between phrases are left out.
+  function phrases(text) {
+    return text.split(/\n+/)
+      .flatMap((line) => line.split(/(?<=[.,;?!]["'”’)]*)\s+/))
+      .map((s) => s.trim()).filter(Boolean);
+  }
+
+  /* ---------- optional draft on this device (Pray by myself only) ---------- */
 
   function loadDraft() {
     try {
@@ -95,14 +138,14 @@
       if (Array.isArray(saved)) saved = { answers: saved }; // first version stored a plain list
       if (!saved || !Array.isArray(saved.answers)) return;
       const text = (v) => (typeof v === 'string' ? v : '');
-      answers = answers.map((_, i) => text(saved.answers[i]));
-      parts = parts.map((list, i) => list.map((_, k) => text(((saved.parts || [])[i] || [])[k])));
+      PRAY.answers = PRAY.answers.map((_, i) => text(saved.answers[i]));
+      PRAY.parts = PRAY.parts.map((list, i) => list.map((_, k) => text(((saved.parts || [])[i] || [])[k])));
       keep = true;
     } catch (e) { /* storage unavailable: carry on without it */ }
   }
   function saveDraft() {
     if (!keep) return;
-    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, parts })); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers: PRAY.answers, parts: PRAY.parts })); } catch (e) { /* ignore */ }
   }
   function forgetDraft() {
     try { localStorage.removeItem(DRAFT_KEY); } catch (e) { /* ignore */ }
@@ -117,9 +160,7 @@
       type: 'button', class: 'btn danger',
       onclick: () => {
         if (!window.confirm(L.draft.eraseConfirm)) return;
-        answers = answers.map(() => '');
-        parts = parts.map((list) => list.map(() => ''));
-        edited.clear();
+        resetFlow(PRAY);
         forgetDraft();
         saveDraft();
         flash = L.draft.erased;
@@ -138,24 +179,35 @@
 
   /* ---------- screens ---------- */
 
+  // A large button on the welcome screen that starts one of the two ways.
+  function choice(href, label, hint, extraClass, onclick) {
+    return h('a', { class: 'btn choice ' + extraClass, href, onclick },
+      h('strong', null, label), h('span', null, hint));
+  }
+
+  // Tapping Begin fixes "today" for this prayer, so the passages offered
+  // do not change if the prayer runs past midnight.
+  const today = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
+  const fixDay = () => { prayerDay = today(); };
+  function beginLink(href, label) {
+    return h('a', { class: 'btn primary grow', href, onclick: fixDay }, label);
+  }
+
   function welcomeView() {
+    const w = L.welcome;
     return {
       nodes: [
-        h('h1', null, L.welcome.heading),
-        L.welcome.verses.map((r) => passage([r])),
-        paragraphs(L.welcome.body),
-        h('div', { class: 'actions' }, beginLink('#/guide', L.welcome.begin)),
-        h('p', null, h('a', { href: '#/why' }, L.welcome.whyLink)),
+        h('h1', null, w.heading),
+        w.verses.map((r) => passage([r])),
+        paragraphs(w.body),
+        h('h2', null, w.choose),
+        h('div', { class: 'choices' },
+          choice('#/guide', w.byMyself, w.byMyselfHint, 'primary', fixDay),
+          choice('#/lead', w.withSomeone, w.withSomeoneHint, '')),
+        h('p', null, h('a', { href: '#/why' }, w.whyLink)),
         draftSection(),
       ],
     };
-  }
-
-  // A Begin button. Tapping it fixes "today" for this prayer, so the passages
-  // offered do not change if the prayer runs past midnight.
-  const today = () => Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 86400000);
-  function beginLink(href, label) {
-    return h('a', { class: 'btn primary grow', href, onclick: () => { prayerDay = today(); } }, label);
   }
 
   function whyView() {
@@ -175,7 +227,7 @@
   // so nothing about the person needs to be stored. The day is the one fixed at
   // Begin, or today if a step was opened directly.
   function todaysPassages(pool) {
-    const perDay = Math.min(L.step.perDay, pool.length);
+    const perDay = Math.min(L.step.perDay, (pool || []).length);
     if (!perDay) return [[], []];
     const day = prayerDay == null ? today() : prayerDay;
     const start = (day * perDay) % pool.length;
@@ -185,14 +237,14 @@
     return [picks, rest];
   }
 
-  const progressText = (n) => L.step.progress.replace('{n}', n).replace('{total}', L.steps.length);
-  const dots = (i) => h('ol', { class: 'dots', 'aria-hidden': 'true' },
-    L.steps.map((_, j) => h('li', { class: j <= i ? 'done' : '' })));
+  const progressText = (F, n) => L.step.progress.replace('{n}', n).replace('{total}', F.steps.length);
+  const dots = (F, i) => h('ol', { class: 'dots', 'aria-hidden': 'true' },
+    F.steps.map((_, j) => h('li', { class: j <= i ? 'done' : '' })));
   // Each step keeps the words of its short questions; the step's words are those
   // joined with a space, so the step reads as one paragraph. Nothing is added to them.
-  const joined = (i) => parts[i].filter((t) => t.trim()).join(' ');
+  const joined = (F, i) => F.parts[i].filter((t) => t.trim()).join(' ');
 
-  // "Guide me": a short start screen with the words of Jesus about praying simply.
+  // "Pray by myself": a short start screen with the words of Jesus about praying simply.
   function guideIntroView() {
     const g = L.guide;
     return {
@@ -203,43 +255,45 @@
         paragraphs(g.intro),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: '#/' }, L.nav.back),
-          beginLink('#/step/1/1', g.begin)),
+          beginLink(PRAY.q(1, 1), g.begin)),
       ],
     };
   }
 
-  // "Guide me": one short question on the screen at a time.
-  function guideView(i, k) {
+  // One short question on the screen at a time. Used by both ways through the app.
+  function guideView(F, i, k) {
     const g = L.guide;
-    const step = L.steps[i];
+    const step = F.steps[i];
     const item = step.guided[k];
     const count = step.guided.length;
     const n = i + 1;
-    const progress = progressText(n) + (count > 1 ? g.questionOf.replace('{k}', k + 1).replace('{count}', count) : '');
-    const last = n === L.steps.length && k === count - 1;
+    const progress = progressText(F, n) + (count > 1 ? g.questionOf.replace('{k}', k + 1).replace('{count}', count) : '');
+    const last = n === F.steps.length && k === count - 1;
 
     // If the words were changed on the read-through screen, keep them all: put them under the first question.
-    if (joined(i) !== answers[i]) parts[i] = parts[i].map((_, q) => (q ? '' : answers[i]));
-    const editedNote = edited.has(i) && count > 1 && h('p', { class: 'note' }, k ? g.editedFirst : g.editedHere);
+    if (joined(F, i) !== F.answers[i]) F.parts[i] = F.parts[i].map((_, q) => (q ? '' : F.answers[i]));
+    const editedNote = F.edited.has(i) && count > 1 && h('p', { class: 'note' }, k ? g.editedFirst : g.editedHere);
 
-    const nextHref = k + 1 < count ? '#/step/' + n + '/' + (k + 2) : last ? '#/review' : '#/step/' + (n + 1) + '/1';
-    const backHref = k > 0 ? '#/step/' + n + '/' + k
-      : i > 0 ? '#/step/' + i + '/' + L.steps[i - 1].guided.length : '#/guide';
-    const nextLabel = () => (last ? g.toReview : parts[i][k].trim() ? L.nav.next : L.nav.skipQuestion);
+    const nextHref = k + 1 < count ? F.q(n, k + 2) : last ? F.review : F.q(n + 1, 1);
+    const backHref = k > 0 ? F.q(n, k) : i > 0 ? F.q(i, F.steps[i - 1].guided.length) : F.first;
+    const nextLabel = () => (last ? F.toReview : F.parts[i][k].trim() ? L.nav.next : L.nav.skipQuestion);
     const next = h('a', { class: 'btn primary grow', href: nextHref }, nextLabel());
 
     // The box always starts with the person's own words or nothing at all.
     // Spell-check is off so that no browser service is sent what is typed.
-    const update = () => { parts[i][k] = box.value; answers[i] = joined(i); edited.delete(i); next.textContent = nextLabel(); saveDraft(); };
+    const update = () => {
+      F.parts[i][k] = box.value; F.answers[i] = joined(F, i); F.edited.delete(i);
+      next.textContent = nextLabel(); F.save();
+    };
     const box = h('textarea', {
       id: 'words', class: 'short', rows: '4', autocomplete: 'off', spellcheck: 'false',
       'aria-describedby': 'words-hint', oninput: update,
     });
-    box.value = parts[i][k];
+    box.value = F.parts[i][k];
 
-    // "Think about" prompts are for reflection only. Nothing is ever put in the box for the person.
+    // Prompts are for reflection only. Nothing is ever put in the box for the person.
     const cues = item.cues && h('div', { class: 'cues' },
-      h('p', { id: 'cues-label' }, L.step.cuesLabel + ':'),
+      h('p', { id: 'cues-label' }, F.cuesLabel + ':'),
       h('ul', { 'aria-labelledby': 'cues-label' }, item.cues.map((cue) => h('li', null, cue))));
     const [picks, rest] = todaysPassages(step.related);
 
@@ -247,17 +301,18 @@
       title: progress + ': ' + step.name,
       nodes: [
         h('p', { class: 'progress' }, progress),
-        dots(i),
+        dots(F, i),
         h('h1', null, step.name),
         step.verses.map((v) => passage(v, 'main')),
-        step.note && h('p', { class: 'note' }, h('strong', null, L.app.ourNoteLabel + ': '), step.note),
+        ourNote(step.note),
         h('div', { class: 'ask' },
           h('label', { for: 'words' }, item.q),
           item.example && [h('h2', { class: 'small' }, g.exampleHeading), passage(item.example)],
           cues,
           editedNote,
           box,
-          h('p', { class: 'hint', id: 'words-hint' }, g.hint)),
+          h('p', { class: 'hint', id: 'words-hint' }, F.hint)),
+        F.needHelp && h('p', null, h('a', { href: F.needHelp }, L.lead.needHelp)),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: backHref }, L.nav.back),
           next),
@@ -268,51 +323,81 @@
   }
 
   // The whole prayer in one place, one box per step, to read through and make one's own before praying it.
-  function reviewView() {
-    const g = L.guide;
-    const filled = L.steps.map((st, i) => ({ st, i })).filter(({ i }) => answers[i].trim());
-    if (!filled.length) return prayerView();
-    const lastStep = L.steps.length;
+  function reviewView(F) {
+    const s = F.reviewText;
+    const filled = F.steps.map((st, i) => ({ st, i })).filter(({ i }) => F.answers[i].trim());
+    const backHref = F.q(F.steps.length, F.steps[F.steps.length - 1].guided.length);
+    if (!filled.length && !F.borrowed.length) {
+      if (!F.needHelp) return prayerView(F);
+      // A prayer with no words cannot be prayed: offer the prayers from Scripture.
+      return {
+        title: s.heading,
+        nodes: [
+          h('h1', null, s.heading),
+          h('p', { class: 'lead' }, s.empty),
+          h('div', { class: 'actions' },
+            h('a', { class: 'btn', href: backHref }, L.nav.back),
+            h('a', { class: 'btn primary grow', href: F.needHelp }, s.toBorrow)),
+        ],
+      };
+    }
     return {
-      title: g.reviewHeading,
+      title: s.heading,
       nodes: [
-        h('h1', null, g.reviewHeading),
-        h('p', { class: 'lead', id: 'review-hint' }, g.reviewHint),
+        h('h1', null, s.heading),
+        h('p', { class: 'lead', id: 'review-hint' }, s.hint),
+        s.lineHint && h('p', { class: 'hint' }, s.lineHint),
         filled.map(({ st, i }) => {
           const id = 'review-' + (i + 1);
           // Spell-check is off so that no browser service is sent what is typed.
           const box = h('textarea', {
             id, rows: '4', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'review-hint',
-            oninput: (e) => { answers[i] = e.target.value; edited.add(i); saveDraft(); },
+            oninput: (e) => { F.answers[i] = e.target.value; F.edited.add(i); F.save(); },
           });
-          box.value = answers[i];
+          box.value = F.answers[i];
           return h('div', { class: 'ask' }, h('label', { for: id }, st.name), box);
         }),
+        // Scripture chosen to borrow is shown as it is, with its reference. It is not edited.
+        F.borrowed.length > 0 && [
+          h('h2', null, s.borrowedHeading),
+          F.borrowed.map((r) => h('div', { class: 'borrowed' },
+            passage([r]),
+            h('button', {
+              type: 'button', class: 'btn',
+              onclick: () => { F.borrowed = F.borrowed.filter((x) => x !== r); render(true); },
+            }, s.remove + ': ' + refLabel([r])))),
+        ],
         h('div', { class: 'actions' },
-          h('a', { class: 'btn', href: '#/step/' + lastStep + '/' + L.steps[lastStep - 1].guided.length }, L.nav.back),
-          h('a', { class: 'btn primary grow', href: '#/pray/1' }, g.toAloud)),
+          h('a', { class: 'btn', href: backHref }, L.nav.back),
+          h('a', { class: 'btn primary grow', href: F.walk + '1' }, s.toWalk)),
       ],
     };
   }
 
-  // "Guide me" ends here: the person's own words in large text, one part at a time, to say out loud.
-  function prayWalkView(n) {
+  // Praying out loud. Pray by myself: one part at a time. Share Jesus: one phrase at a time,
+  // for the leader to read and the other person to repeat.
+  function prayWalkView(F, n) {
     const g = L.guide;
-    const said = L.steps.map((st, i) => ({ name: st.name, text: answers[i] })).filter((part) => part.text.trim());
-    if (!said.length) return prayerView();
-    const idx = Math.min(Math.max(n, 1), said.length) - 1;
-    const progress = g.partOf.replace('{n}', idx + 1).replace('{total}', said.length);
-    const lastPart = idx === said.length - 1;
+    const units = F.perPhrase
+      ? prayerParts(F).flatMap((p) => phrases(p.text).map((t) => ({ name: p.name, text: t, ref: p.ref })))
+      : prayerParts(F);
+    if (!units.length) return F.perPhrase ? reviewView(F) : prayerView(F);
+    const idx = Math.min(Math.max(n, 1), units.length) - 1;
+    const u = units[idx];
+    const lastPart = idx === units.length - 1;
+    const progress = (F.perPhrase ? L.lead.walk.progress : g.partOf).replace('{n}', idx + 1).replace('{total}', units.length);
     return {
-      title: progress + ': ' + said[idx].name,
+      title: progress + ': ' + u.name,
       nodes: [
-        h('p', { class: 'progress' }, progress + ' \u00b7 ' + said[idx].name),
-        h('h1', null, g.sayThis),
-        h('div', { class: 'aloud' }, h('p', null, said[idx].text)),
+        h('p', { class: 'progress' }, progress + ' · ' + u.name),
+        h('h1', { class: F.perPhrase ? 'visually-hidden' : null }, F.perPhrase ? progress : g.sayThis),
+        h('div', { class: F.perPhrase ? 'aloud phrase' : 'aloud' }, h('p', null, u.text),
+          u.ref && h('p', { class: 'cite' }, cite(u.ref))),
+        F.perPhrase && h('p', { class: 'leader-line' }, L.lead.walk.leaderLine),
         h('div', { class: 'actions' },
-          h('a', { class: 'btn', href: idx > 0 ? '#/pray/' + idx : '#/review' }, L.nav.back),
-          h('a', { class: 'btn primary grow', href: lastPart ? '#/prayer' : '#/pray/' + (idx + 2) },
-            lastPart ? g.finish : L.nav.next)),
+          h('a', { class: 'btn', href: idx > 0 ? F.walk + idx : F.review }, L.nav.back),
+          h('a', { class: 'btn primary grow', href: lastPart ? F.prayer : F.walk + (idx + 2) },
+            lastPart ? F.finish : L.nav.next)),
       ],
     };
   }
@@ -342,50 +427,156 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  function prayerView() {
-    const parts = written();
-    const nodes = [h('h1', null, L.prayer.heading)];
-    if (!parts.length) {
+  function prayerView(F) {
+    const list = prayerParts(F);
+    const nodes = [h('h1', null, F.prayerText.heading)];
+    if (!list.length) {
       nodes.push(h('p', null, L.prayer.empty),
-        h('div', { class: 'actions' }, h('a', { class: 'btn primary', href: '#/guide' }, L.guide.begin)));
+        h('div', { class: 'actions' }, h('a', { class: 'btn primary', href: F.first }, L.guide.begin)));
     } else {
       const status = h('p', { class: 'status', role: 'status' });
+      const text = plain(list);
       nodes.push(
-        h('p', { class: 'no-print' }, L.prayer.intro),
-        // Only the person's own words, exactly as typed, in step order.
-        h('div', { class: 'prayer' }, paragraphs(parts)),
+        h('p', { class: 'no-print' }, F.prayerText.intro),
+        // Only the person's own words, exactly as typed, in order, and any Scripture they chose.
+        h('div', { class: 'prayer' }, list.map((p) => [h('p', null, p.text), p.ref && h('p', { class: 'cite' }, cite(p.ref))])),
         h('div', { class: 'actions' },
           h('button', {
             type: 'button', class: 'btn primary',
-            onclick: async () => { status.textContent = (await copyText(parts.join('\n\n'))) ? L.prayer.copied : L.prayer.copyFailed; },
+            onclick: async () => { status.textContent = (await copyText(text)) ? L.prayer.copied : L.prayer.copyFailed; },
           }, L.prayer.copy),
           // Share opens the device's own share sheet; the person chooses where the words go.
           navigator.share && h('button', {
             type: 'button', class: 'btn',
-            onclick: () => { navigator.share({ text: parts.join('\n\n') }).catch(() => {}); },
+            onclick: () => { navigator.share({ text }).catch(() => {}); },
           }, L.prayer.share),
           h('button', {
             type: 'button', class: 'btn',
-            onclick: () => { saveFile(parts.join('\n\n')); status.textContent = L.prayer.saved; },
+            onclick: () => { saveFile(text); status.textContent = L.prayer.saved; },
           }, L.prayer.save),
           h('button', { type: 'button', class: 'btn', onclick: () => window.print() }, L.prayer.print),
-          h('a', { class: 'btn', href: '#/aloud' }, L.prayer.aloud),
-          h('a', { class: 'btn', href: '#/review' }, L.prayer.edit)),
-        status);
+          F === PRAY && h('a', { class: 'btn', href: '#/aloud' }, L.prayer.aloud),
+          h('a', { class: 'btn', href: F.review }, L.prayer.edit)),
+        status,
+        F === LEAD && h('div', { class: 'actions' }, h('a', { class: 'btn primary grow', href: '#/lead/after' }, L.lead.prayer.next)));
     }
-    nodes.push(draftSection());
-    return { title: L.prayer.heading, nodes };
+    if (F === PRAY) nodes.push(draftSection());
+    return { title: F.prayerText.heading, nodes };
   }
 
   function aloudView() {
-    const parts = written();
-    if (!parts.length) return prayerView();
+    const list = prayerParts(PRAY);
+    if (!list.length) return prayerView(PRAY);
     return {
       title: L.prayer.aloudHeading,
       nodes: [
         h('h1', { class: 'progress' }, L.prayer.aloudHeading),
-        h('div', { class: 'aloud' }, paragraphs(parts)),
+        h('div', { class: 'aloud' }, paragraphs(list.map((p) => p.text))),
         h('div', { class: 'actions' }, h('a', { class: 'btn primary', href: '#/prayer' }, L.prayer.aloudClose)),
+      ],
+    };
+  }
+
+  /* ---------- Share Jesus: the screens that are not questions ---------- */
+
+  // Leaving Share Jesus forgets what was typed, so the next person starts with nothing.
+  const homeLink = (label) => h('a', { class: 'btn primary grow', href: '#/', onclick: () => resetFlow(LEAD) }, label);
+
+  // Screen 1, for the leader. Starting here always begins with empty boxes.
+  function leadStartView() {
+    const s = L.lead.start;
+    return {
+      title: s.name + ' | ' + L.lead.name,
+      nodes: [
+        h('p', { class: 'progress' }, L.lead.name),
+        h('h1', null, s.name),
+        s.verses.map((v) => passage(v)),
+        ourNote(s.note),
+        h('div', { class: 'ask' }, h('p', { class: 'small-label' }, s.askLabel + ':'), h('p', { class: 'say-aloud' }, s.ask)),
+        h('div', { class: 'actions' },
+          h('a', { class: 'btn', href: '#/' }, L.nav.back),
+          h('a', { class: 'btn primary grow', href: '#/lead/cost', onclick: () => resetFlow(LEAD) }, s.next)),
+      ],
+    };
+  }
+
+  // Screen 2, read together. Nothing said here is typed or put in the prayer.
+  function leadCostView() {
+    const s = L.lead.cost;
+    return {
+      title: s.name + ' | ' + L.lead.name,
+      nodes: [
+        h('p', { class: 'progress' }, L.lead.name),
+        h('h1', null, s.name),
+        h('p', null, s.intro),
+        s.verses.map((v) => passage(v)),
+        ourNote(s.extraNote),
+        s.extraVerses.map((v) => passage(v)),
+        h('div', { class: 'ask' }, h('p', { class: 'small-label' }, L.lead.start.askLabel + ':'), h('p', { class: 'say-aloud' }, s.ask)),
+        h('div', { class: 'actions' },
+          h('a', { class: 'btn', href: '#/lead/not-today' }, s.no),
+          h('a', { class: 'btn primary grow', href: LEAD.q(1, 1) }, s.yes)),
+      ],
+    };
+  }
+
+  function leadNotTodayView() {
+    const s = L.lead.notToday;
+    resetFlow(LEAD);
+    return {
+      title: s.heading,
+      nodes: [
+        h('h1', null, s.heading),
+        ourNote(s.note),
+        h('div', { class: 'actions' }, homeLink(s.home)),
+      ],
+    };
+  }
+
+  // Screen 7: prayers from Scripture, for someone who cannot find words.
+  function leadBorrowView() {
+    const s = L.lead.borrow;
+    return {
+      title: s.name + ' | ' + L.lead.name,
+      nodes: [
+        h('p', { class: 'progress' }, L.lead.name),
+        h('h1', null, s.name),
+        ourNote(s.note),
+        s.prayers.map((r, j) => {
+          const id = 'use-' + (j + 1);
+          const box = h('input', {
+            type: 'checkbox', id, checked: LEAD.borrowed.includes(r),
+            onchange: (e) => {
+              // Keep the order they are listed in, whatever order they are ticked.
+              const on = new Set(LEAD.borrowed.filter((x) => x !== r));
+              if (e.target.checked) on.add(r);
+              LEAD.borrowed = s.prayers.filter((x) => on.has(x));
+            },
+          });
+          return h('div', { class: 'borrowed' }, passage([r]),
+            h('label', { class: 'check', for: id }, box, h('span', null, s.use + ': ' + refLabel([r]))));
+        }),
+        h('div', { class: 'actions' },
+          h('button', { type: 'button', class: 'btn', onclick: () => history.back() }, L.nav.back),
+          h('a', { class: 'btn primary grow', href: LEAD.review }, s.done)),
+      ],
+    };
+  }
+
+  // After the prayer: Scripture's assurance and honest warning, and next steps.
+  // Nothing here says what the person's standing is. The Scripture is shown and left there.
+  function leadAfterView() {
+    const s = L.lead.after;
+    return {
+      title: s.heading,
+      nodes: [
+        h('h1', null, s.heading),
+        s.sections.map((sec) => [h('h2', null, sec.heading), sec.verses.map((v) => passage(v)), ourNote(sec.note)]),
+        h('h2', null, s.nextHeading),
+        h('ol', { class: 'next-steps' }, s.next.map((item) =>
+          h('li', null, h('p', null, h('strong', null, item.text)), item.verses.map((v) => passage(v))))),
+        ourNote(s.leaderNote),
+        h('div', { class: 'actions' }, homeLink(s.home)),
       ],
     };
   }
@@ -410,23 +601,41 @@
 
   /* ---------- router ---------- */
 
+  function questionView(F, a, b) {
+    const i = parseInt(a, 10) - 1;
+    if (!F.steps[i]) return null;
+    const count = F.steps[i].guided.length;
+    return guideView(F, i, Math.min(Math.max(parseInt(b, 10) || 1, 1), count) - 1);
+  }
+
+  function leadView(sub, a) {
+    if (sub === 'cost') return leadCostView();
+    if (sub === 'not-today') return leadNotTodayView();
+    if (sub === 'q') return questionView(LEAD, a, 1);
+    if (sub === 'borrow') return leadBorrowView();
+    if (sub === 'review') return reviewView(LEAD);
+    if (sub === 'pray') return prayWalkView(LEAD, parseInt(a, 10) || 1);
+    if (sub === 'prayer') return prayerView(LEAD);
+    if (sub === 'after') return leadAfterView();
+    return leadStartView();
+  }
+
   function render(moveFocus) {
     const [name, arg, arg2] = location.hash.replace(/^#\/?/, '').split('/');
-    const stepIndex = parseInt(arg, 10) - 1;
-    let view;
-    if (name === 'step' && L.steps[stepIndex]) {
-      const count = L.steps[stepIndex].guided.length;
-      view = guideView(stepIndex, Math.min(Math.max(parseInt(arg2, 10) || 1, 1), count) - 1);
-    }
+    let view = null;
+    if (name === 'step') view = questionView(PRAY, arg, arg2);
+    else if (name === 'lead') view = leadView(arg, arg2);
     else if (name === 'guide') view = guideIntroView();
-    else if (name === 'review') view = reviewView();
-    else if (name === 'pray') view = prayWalkView(parseInt(arg, 10) || 1);
-    else if (name === 'prayer') view = prayerView();
+    else if (name === 'review') view = reviewView(PRAY);
+    else if (name === 'pray') view = prayWalkView(PRAY, parseInt(arg, 10) || 1);
+    else if (name === 'prayer') view = prayerView(PRAY);
     else if (name === 'aloud') view = aloudView();
     else if (name === 'about') view = aboutView();
     else if (name === 'why') view = whyView();
-    else view = welcomeView();
+    if (!view) view = welcomeView();
 
+    // Share Jesus is held between two people, so its text is larger.
+    document.body.classList.toggle('together', name === 'lead');
     main.replaceChildren(...view.nodes.flat(Infinity).filter(Boolean));
     document.title = view.title ? view.title + ' | ' + L.app.name : L.app.name;
     if (moveFocus) {
@@ -453,8 +662,18 @@
     skip.textContent = L.app.skipToContent;
     skip.addEventListener('click', (e) => { e.preventDefault(); main.focus(); });
 
-    answers = L.steps.map(() => '');
-    parts = L.steps.map((st) => (st.guided || []).map(() => ''));
+    PRAY = makeFlow(L.steps, {
+      q: (n, k) => '#/step/' + n + '/' + k, first: '#/guide', review: '#/review', walk: '#/pray/', prayer: '#/prayer',
+      save: saveDraft, cuesLabel: L.step.cuesLabel, hint: L.guide.hint, toReview: L.guide.toReview, finish: L.guide.finish,
+      reviewText: { heading: L.guide.reviewHeading, hint: L.guide.reviewHint, toWalk: L.guide.toAloud },
+      prayerText: L.prayer,
+    });
+    // Share Jesus words are held in memory only: save() never writes them anywhere.
+    LEAD = makeFlow(L.lead.steps, {
+      q: (n) => '#/lead/q/' + n, first: '#/lead/cost', review: '#/lead/review', walk: '#/lead/pray/', prayer: '#/lead/prayer',
+      save: () => {}, cuesLabel: L.lead.ideasLabel, hint: L.lead.hint, toReview: L.lead.review.heading, finish: L.lead.walk.finish,
+      needHelp: '#/lead/borrow', perPhrase: true, reviewText: L.lead.review, prayerText: L.lead.prayer,
+    });
     loadDraft();
     // The skip link's target is #main, which is not a screen: never route to it.
     window.addEventListener('hashchange', () => { if (location.hash !== '#main') render(true); });
@@ -464,7 +683,8 @@
       const hadWorker = !!navigator.serviceWorker.controller;
       let reloaded = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!hadWorker || reloaded || (!keep && written().length)) return;
+        // Never reload while there are words on the screen that are not kept anywhere.
+        if (!hadWorker || reloaded || ((!keep || prayerParts(LEAD).length) && anyWords())) return;
         reloaded = true;
         location.reload();
       });

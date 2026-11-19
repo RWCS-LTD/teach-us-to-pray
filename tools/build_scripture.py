@@ -53,6 +53,18 @@ PASSAGES = [
     # Closing step: Jesus' words
     ("JHN", 14, 13, 14),
     ("JHN", 16, 23, 24),
+    # Share Jesus: before you begin, count the cost
+    ("JHN", 6, 44, 44), ("ACT", 8, 30, 31), ("1CO", 3, 6, 7),
+    ("LUK", 14, 28, 28), ("LUK", 9, 23, 23), ("LUK", 8, 13, 13),
+    # Share Jesus: who Jesus is, being honest, following, asking, words to borrow
+    ("ROM", 10, 9, 10), ("1CO", 15, 3, 4), ("JHN", 3, 16, 16),
+    ("MRK", 1, 15, 15), ("1JN", 1, 9, 9), ("MRK", 1, 17, 17),
+    ("LUK", 23, 42, 42), ("MRK", 9, 24, 24),
+    # Share Jesus: after the prayer, next steps
+    ("EPH", 2, 8, 9), ("JHN", 10, 27, 29), ("PHP", 1, 6, 6), ("MAT", 28, 19, 20),
+    ("ROM", 8, 38, 39), ("HEB", 13, 5, 5), ("MAT", 7, 24, 27), ("1PE", 4, 12, 12),
+    ("JAS", 1, 2, 4), ("1CO", 10, 13, 13), ("2CO", 5, 7, 7),
+    ("ACT", 2, 38, 38), ("HEB", 10, 24, 25), ("ACT", 2, 42, 42),
 ]
 
 # Part-verses. Each verse is cut immediately before the given marker string.
@@ -61,6 +73,13 @@ PASSAGES = [
 SPLITS = {
     "MAT 6:9": "may your name be kept holy",
     "MAT 6:13": "For yours is the Kingdom",
+    # Share Jesus: the warning and the promise in one verse
+    "JHN 16:33": "but cheer up",
+    # Share Jesus: the prayer itself, without the narrative around it
+    "LUK 18:13": "God, be merciful",
+    "LUK 23:42": "Lord, remember",
+    "MRK 9:24": "I believe",
+    "MAT 28:20": "Behold, I am with you",
 }
 
 # Text that must never appear in the output (see README: the doxology is not shown).
