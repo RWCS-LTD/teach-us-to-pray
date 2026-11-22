@@ -97,7 +97,7 @@ textarea.short { min-height: 5.5rem; }
 .cues p { margin: 0 0 .25rem; }
 .cues ul { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: 0; padding: 0; list-style: none; }
 .cues li { color: var(--text); }
-.lead { font-size: 1.15rem; font-weight: 600; line-height: 1.45; }
+.standout { font-size: 1.15rem; font-weight: 600; line-height: 1.45; }
 h2.small { margin: .9rem 0 .4rem; font-size: .9rem; }
 .ask .verse { margin-bottom: .5rem; }
 .ask .hint { margin: .6rem 0 0; }

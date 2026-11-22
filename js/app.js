@@ -16,7 +16,7 @@
   let L;            // language strings
   let S;            // scripture document
   let PRAY;         // "Pray by myself": the guided prayer
-  let LEAD;         // "Share Jesus": a leader guiding someone else
+  let SHARE;        // "Share Jesus": a leader guiding someone else
   let keep = false; // "keep my draft on this device" (Pray by myself only)
   let flash = '';   // one-time status message for the next render
   let prayerDay = null; // the day fixed when the person taps Begin (memory only)
@@ -118,7 +118,7 @@
     const lent = F.borrowed.map((r) => ({ name: refLabel([r]), text: scripture([r]), ref: [r] }));
     return own.concat(lent);
   }
-  const anyWords = () => prayerParts(PRAY).length > 0 || prayerParts(LEAD).length > 0;
+  const anyWords = () => prayerParts(PRAY).length > 0 || prayerParts(SHARE).length > 0;
   // Plain text of the prayer, for Copy, Share and Save. Borrowed Scripture keeps its reference.
   const plain = (list) => list.map((p) => (p.ref ? p.text + '\n(' + cite(p.ref) + ')' : p.text)).join('\n\n');
 
@@ -203,7 +203,7 @@
         h('h2', null, w.choose),
         h('div', { class: 'choices' },
           choice('#/guide', w.byMyself, w.byMyselfHint, 'primary', fixDay),
-          choice('#/lead', w.withSomeone, w.withSomeoneHint, '')),
+          choice('#/share', L.share.name, w.shareHint, '')),
         h('p', null, h('a', { href: '#/why' }, w.whyLink)),
         draftSection(),
       ],
@@ -312,7 +312,7 @@
           editedNote,
           box,
           h('p', { class: 'hint', id: 'words-hint' }, F.hint)),
-        F.needHelp && h('p', null, h('a', { href: F.needHelp }, L.lead.needHelp)),
+        F.needHelp && h('p', null, h('a', { href: F.needHelp }, L.share.needHelp)),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: backHref }, L.nav.back),
           next),
@@ -334,7 +334,7 @@
         title: s.heading,
         nodes: [
           h('h1', null, s.heading),
-          h('p', { class: 'lead' }, s.empty),
+          h('p', { class: 'standout' }, s.empty),
           h('div', { class: 'actions' },
             h('a', { class: 'btn', href: backHref }, L.nav.back),
             h('a', { class: 'btn primary grow', href: F.needHelp }, s.toBorrow)),
@@ -345,7 +345,7 @@
       title: s.heading,
       nodes: [
         h('h1', null, s.heading),
-        h('p', { class: 'lead', id: 'review-hint' }, s.hint),
+        h('p', { class: 'standout', id: 'review-hint' }, s.hint),
         s.lineHint && h('p', { class: 'hint' }, s.lineHint),
         filled.map(({ st, i }) => {
           const id = 'review-' + (i + 1);
@@ -385,7 +385,7 @@
     const idx = Math.min(Math.max(n, 1), units.length) - 1;
     const u = units[idx];
     const lastPart = idx === units.length - 1;
-    const progress = (F.perPhrase ? L.lead.walk.progress : g.partOf).replace('{n}', idx + 1).replace('{total}', units.length);
+    const progress = (F.perPhrase ? L.share.walk.progress : g.partOf).replace('{n}', idx + 1).replace('{total}', units.length);
     return {
       title: progress + ': ' + u.name,
       nodes: [
@@ -393,7 +393,7 @@
         h('h1', { class: F.perPhrase ? 'visually-hidden' : null }, F.perPhrase ? progress : g.sayThis),
         h('div', { class: F.perPhrase ? 'aloud phrase' : 'aloud' }, h('p', null, u.text),
           u.ref && h('p', { class: 'cite' }, cite(u.ref))),
-        F.perPhrase && h('p', { class: 'leader-line' }, L.lead.walk.leaderLine),
+        F.perPhrase && h('p', { class: 'leader-line' }, L.share.walk.leaderLine),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: idx > 0 ? F.walk + idx : F.review }, L.nav.back),
           h('a', { class: 'btn primary grow', href: lastPart ? F.prayer : F.walk + (idx + 2) },
@@ -458,7 +458,7 @@
           F === PRAY && h('a', { class: 'btn', href: '#/aloud' }, L.prayer.aloud),
           h('a', { class: 'btn', href: F.review }, L.prayer.edit)),
         status,
-        F === LEAD && h('div', { class: 'actions' }, h('a', { class: 'btn primary grow', href: '#/lead/after' }, L.lead.prayer.next)));
+        F === SHARE && h('div', { class: 'actions' }, h('a', { class: 'btn primary grow', href: '#/share/after' }, L.share.prayer.next)));
     }
     if (F === PRAY) nodes.push(draftSection());
     return { title: F.prayerText.heading, nodes };
@@ -480,49 +480,49 @@
   /* ---------- Share Jesus: the screens that are not questions ---------- */
 
   // Leaving Share Jesus forgets what was typed, so the next person starts with nothing.
-  const homeLink = (label) => h('a', { class: 'btn primary grow', href: '#/', onclick: () => resetFlow(LEAD) }, label);
+  const homeLink = (label) => h('a', { class: 'btn primary grow', href: '#/', onclick: () => resetFlow(SHARE) }, label);
 
   // Screen 1, for the leader. Starting here always begins with empty boxes.
-  function leadStartView() {
-    const s = L.lead.start;
+  function shareStartView() {
+    const s = L.share.start;
     return {
-      title: s.name + ' | ' + L.lead.name,
+      title: s.name + ' | ' + L.share.name,
       nodes: [
-        h('p', { class: 'progress' }, L.lead.name),
+        h('p', { class: 'progress' }, L.share.name),
         h('h1', null, s.name),
         s.verses.map((v) => passage(v)),
         ourNote(s.note),
         h('div', { class: 'ask' }, h('p', { class: 'small-label' }, s.askLabel + ':'), h('p', { class: 'say-aloud' }, s.ask)),
         h('div', { class: 'actions' },
           h('a', { class: 'btn', href: '#/' }, L.nav.back),
-          h('a', { class: 'btn primary grow', href: '#/lead/cost', onclick: () => resetFlow(LEAD) }, s.next)),
+          h('a', { class: 'btn primary grow', href: '#/share/cost', onclick: () => resetFlow(SHARE) }, s.next)),
       ],
     };
   }
 
   // Screen 2, read together. Nothing said here is typed or put in the prayer.
-  function leadCostView() {
-    const s = L.lead.cost;
+  function shareCostView() {
+    const s = L.share.cost;
     return {
-      title: s.name + ' | ' + L.lead.name,
+      title: s.name + ' | ' + L.share.name,
       nodes: [
-        h('p', { class: 'progress' }, L.lead.name),
+        h('p', { class: 'progress' }, L.share.name),
         h('h1', null, s.name),
         h('p', null, s.intro),
         s.verses.map((v) => passage(v)),
         ourNote(s.extraNote),
         s.extraVerses.map((v) => passage(v)),
-        h('div', { class: 'ask' }, h('p', { class: 'small-label' }, L.lead.start.askLabel + ':'), h('p', { class: 'say-aloud' }, s.ask)),
+        h('div', { class: 'ask' }, h('p', { class: 'small-label' }, L.share.start.askLabel + ':'), h('p', { class: 'say-aloud' }, s.ask)),
         h('div', { class: 'actions' },
-          h('a', { class: 'btn', href: '#/lead/not-today' }, s.no),
-          h('a', { class: 'btn primary grow', href: LEAD.q(1, 1) }, s.yes)),
+          h('a', { class: 'btn', href: '#/share/not-today' }, s.no),
+          h('a', { class: 'btn primary grow', href: SHARE.q(1, 1) }, s.yes)),
       ],
     };
   }
 
-  function leadNotTodayView() {
-    const s = L.lead.notToday;
-    resetFlow(LEAD);
+  function shareNotTodayView() {
+    const s = L.share.notToday;
+    resetFlow(SHARE);
     return {
       title: s.heading,
       nodes: [
@@ -534,23 +534,23 @@
   }
 
   // Screen 7: prayers from Scripture, for someone who cannot find words.
-  function leadBorrowView() {
-    const s = L.lead.borrow;
+  function shareBorrowView() {
+    const s = L.share.borrow;
     return {
-      title: s.name + ' | ' + L.lead.name,
+      title: s.name + ' | ' + L.share.name,
       nodes: [
-        h('p', { class: 'progress' }, L.lead.name),
+        h('p', { class: 'progress' }, L.share.name),
         h('h1', null, s.name),
         ourNote(s.note),
         s.prayers.map((r, j) => {
           const id = 'use-' + (j + 1);
           const box = h('input', {
-            type: 'checkbox', id, checked: LEAD.borrowed.includes(r),
+            type: 'checkbox', id, checked: SHARE.borrowed.includes(r),
             onchange: (e) => {
               // Keep the order they are listed in, whatever order they are ticked.
-              const on = new Set(LEAD.borrowed.filter((x) => x !== r));
+              const on = new Set(SHARE.borrowed.filter((x) => x !== r));
               if (e.target.checked) on.add(r);
-              LEAD.borrowed = s.prayers.filter((x) => on.has(x));
+              SHARE.borrowed = s.prayers.filter((x) => on.has(x));
             },
           });
           return h('div', { class: 'borrowed' }, passage([r]),
@@ -558,15 +558,15 @@
         }),
         h('div', { class: 'actions' },
           h('button', { type: 'button', class: 'btn', onclick: () => history.back() }, L.nav.back),
-          h('a', { class: 'btn primary grow', href: LEAD.review }, s.done)),
+          h('a', { class: 'btn primary grow', href: SHARE.review }, s.done)),
       ],
     };
   }
 
   // After the prayer: Scripture's assurance and honest warning, and next steps.
   // Nothing here says what the person's standing is. The Scripture is shown and left there.
-  function leadAfterView() {
-    const s = L.lead.after;
+  function shareAfterView() {
+    const s = L.share.after;
     return {
       title: s.heading,
       nodes: [
@@ -608,23 +608,23 @@
     return guideView(F, i, Math.min(Math.max(parseInt(b, 10) || 1, 1), count) - 1);
   }
 
-  function leadView(sub, a) {
-    if (sub === 'cost') return leadCostView();
-    if (sub === 'not-today') return leadNotTodayView();
-    if (sub === 'q') return questionView(LEAD, a, 1);
-    if (sub === 'borrow') return leadBorrowView();
-    if (sub === 'review') return reviewView(LEAD);
-    if (sub === 'pray') return prayWalkView(LEAD, parseInt(a, 10) || 1);
-    if (sub === 'prayer') return prayerView(LEAD);
-    if (sub === 'after') return leadAfterView();
-    return leadStartView();
+  function shareView(sub, a) {
+    if (sub === 'cost') return shareCostView();
+    if (sub === 'not-today') return shareNotTodayView();
+    if (sub === 'q') return questionView(SHARE, a, 1);
+    if (sub === 'borrow') return shareBorrowView();
+    if (sub === 'review') return reviewView(SHARE);
+    if (sub === 'pray') return prayWalkView(SHARE, parseInt(a, 10) || 1);
+    if (sub === 'prayer') return prayerView(SHARE);
+    if (sub === 'after') return shareAfterView();
+    return shareStartView();
   }
 
   function render(moveFocus) {
     const [name, arg, arg2] = location.hash.replace(/^#\/?/, '').split('/');
     let view = null;
     if (name === 'step') view = questionView(PRAY, arg, arg2);
-    else if (name === 'lead') view = leadView(arg, arg2);
+    else if (name === 'share') view = shareView(arg, arg2);
     else if (name === 'guide') view = guideIntroView();
     else if (name === 'review') view = reviewView(PRAY);
     else if (name === 'pray') view = prayWalkView(PRAY, parseInt(arg, 10) || 1);
@@ -635,7 +635,7 @@
     if (!view) view = welcomeView();
 
     // Share Jesus is held between two people, so its text is larger.
-    document.body.classList.toggle('together', name === 'lead');
+    document.body.classList.toggle('together', name === 'share');
     main.replaceChildren(...view.nodes.flat(Infinity).filter(Boolean));
     document.title = view.title ? view.title + ' | ' + L.app.name : L.app.name;
     if (moveFocus) {
@@ -669,10 +669,10 @@
       prayerText: L.prayer,
     });
     // Share Jesus words are held in memory only: save() never writes them anywhere.
-    LEAD = makeFlow(L.lead.steps, {
-      q: (n) => '#/lead/q/' + n, first: '#/lead/cost', review: '#/lead/review', walk: '#/lead/pray/', prayer: '#/lead/prayer',
-      save: () => {}, cuesLabel: L.lead.ideasLabel, hint: L.lead.hint, toReview: L.lead.review.heading, finish: L.lead.walk.finish,
-      needHelp: '#/lead/borrow', perPhrase: true, reviewText: L.lead.review, prayerText: L.lead.prayer,
+    SHARE = makeFlow(L.share.steps, {
+      q: (n) => '#/share/q/' + n, first: '#/share/cost', review: '#/share/review', walk: '#/share/pray/', prayer: '#/share/prayer',
+      save: () => {}, cuesLabel: L.share.ideasLabel, hint: L.share.hint, toReview: L.share.review.heading, finish: L.share.walk.finish,
+      needHelp: '#/share/borrow', perPhrase: true, reviewText: L.share.review, prayerText: L.share.prayer,
     });
     loadDraft();
     // The skip link's target is #main, which is not a screen: never route to it.
@@ -684,7 +684,7 @@
       let reloaded = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         // Never reload while there are words on the screen that are not kept anywhere.
-        if (!hadWorker || reloaded || ((!keep || prayerParts(LEAD).length) && anyWords())) return;
+        if (!hadWorker || reloaded || ((!keep || prayerParts(SHARE).length) && anyWords())) return;
         reloaded = true;
         location.reload();
       });

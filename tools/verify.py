@@ -10,6 +10,7 @@
    begins partway into an excerpt and runs on past it, plus the excerpts listed in
    AS_IN_SOURCE. Use --quotes to print every excerpt the rule changes, before and after.
 7. The language file never uses a fixed prayer or declares anyone saved (NEVER_SAY).
+9. The route for leading someone has one name everywhere (share.name).
 8. No question in a prayer step invites a bare yes or no.
 """
 import json
@@ -79,24 +80,27 @@ AS_IN_SOURCE = {
 NEVER_SAY = ["sinner's prayer", "sinner’s prayer", "you are saved", "you are now saved",
              "you're saved", "welcome to the family", "now you are a christian"]
 
+# Names the route for leading someone was given before it was named "Share Jesus".
+OTHER_NAMES = ["save a soul", "with someone", "lead someone", "pray with someone"]
+
 
 def excerpts(L):
     """Every group of verses the app shows as one excerpt."""
     yield from ([r] for r in L["welcome"]["verses"])
     yield from (s["verses"] for s in L["why"]["sections"])
     yield L["guide"]["introVerses"]
-    for st in L["steps"] + L["lead"]["steps"]:
+    for st in L["steps"] + L["share"]["steps"]:
         yield from st["verses"]
         yield from st.get("related", [])
         yield from (q["example"] for q in st["guided"] if q.get("example"))
-    lead = L["lead"]
-    yield from lead["start"]["verses"]
-    yield from lead["cost"]["verses"]
-    yield from lead["cost"]["extraVerses"]
-    yield from ([r] for r in lead["borrow"]["prayers"])
-    for sec in lead["after"]["sections"]:
+    share = L["share"]
+    yield from share["start"]["verses"]
+    yield from share["cost"]["verses"]
+    yield from share["cost"]["extraVerses"]
+    yield from ([r] for r in share["borrow"]["prayers"])
+    for sec in share["after"]["sections"]:
         yield from sec["verses"]
-    for item in lead["after"]["next"]:
+    for item in share["after"]["next"]:
         yield from item["verses"]
 
 # 1
@@ -139,9 +143,15 @@ for lang_file in sorted((ROOT / "lang").glob("*.json")):
     said = [w for w in NEVER_SAY if w in lower]
     if said:
         problems.append(f"{lang_file.name}: must never say {said}")
+    # 9: the route for leading someone has one name, kept in share.name and used everywhere
+    name = L["share"]["name"]
+    about = " ".join(" ".join(v) if isinstance(v, list) else str(v) for v in L["about"].values())
+    others = [w for w in OTHER_NAMES if w in lower]
+    if others or "withSomeone" in L["welcome"] or f'"{name}"' not in about:
+        problems.append(f"{lang_file.name}: the route must be called only \"{name}\" (found {others})")
     # 8: a question whose answer becomes part of a prayer must not invite a bare yes or no
     yes_no = re.compile(r"^(is|are|do|does|did|have|has|can|will|would|could|should)\b", re.I)
-    for st in L["steps"] + L["lead"]["steps"]:
+    for st in L["steps"] + L["share"]["steps"]:
         for q in st["guided"]:
             if yes_no.match(q["q"]):
                 problems.append(f"{lang_file.name}: yes/no question in a prayer step: {q['q']}")

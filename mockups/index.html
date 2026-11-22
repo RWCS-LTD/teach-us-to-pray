@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en" data-look="book" data-mode="auto">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex"><title>Choose a look</title><style>/* Phase 0 mock-ups: three looks, each in light and dark. System fonts only. */
+:root {
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+  /* bookmark colors (light) */
+  --m-gold: #f6e7b0; --m-blue: #d6e4f7; --m-green: #d8ecd9; --m-rose: #f5dbe0; --m-purple: #e6ddf3; --m-gray: #e4e2dd;
+  --d-gold: #b8860b; --d-blue: #2f6fbf; --d-green: #3c8a4a; --d-rose: #b8475d; --d-purple: #7351a8; --d-gray: #77736b;
+}
+/* A · Book */
+[data-look="book"] {
+  --bg: #f7f3ea; --surface: #fffdf8; --text: #22201b; --muted: #5d584d; --line: #ddd5c3;
+  --accent: #1f3d6b; --on-accent: #fff; --note: #f1ece0; --tnote: #eef0f3;
+  --head: var(--serif); --scrip: var(--serif); --ui: var(--sans);
+  --radius: 4px; --base: 1.0625rem; --verse-border: 3px solid #b39b6a; --h1: 1.9rem; --head-weight: 600;
+}
+/* B · Calm */
+[data-look="calm"] {
+  --bg: #f4f6f3; --surface: #ffffff; --text: #1e2420; --muted: #56615a; --line: #dbe2dc;
+  --accent: #2f6450; --on-accent: #fff; --note: #eef3ef; --tnote: #eef1f6;
+  --head: var(--sans); --scrip: var(--serif); --ui: var(--sans);
+  --radius: 14px; --base: 1.0625rem; --verse-border: 0; --h1: 1.7rem; --head-weight: 650;
+}
+/* C · Clear */
+[data-look="clear"] {
+  --bg: #ffffff; --surface: #ffffff; --text: #000000; --muted: #3b3b3b; --line: #8c8c8c;
+  --accent: #8b1e2d; --on-accent: #fff; --note: #f2f2f2; --tnote: #eef2f7;
+  --head: var(--sans); --scrip: var(--sans); --ui: var(--sans);
+  --radius: 6px; --base: 1.1875rem; --verse-border: 4px solid #000; --h1: 2rem; --head-weight: 800;
+}
+/* Dark, per look: forced by the switch, or following the phone when set to auto. */
+[data-look="book"][data-mode="dark"] { --bg: #17150f; --surface: #211e17; --text: #eee8da; --muted: #bdb5a3; --line: #3e392d; --accent: #9fbbe8; --on-accent: #111c30; --note: #2a261d; --tnote: #1e232b; --verse-border: 3px solid #8a7650; }
+[data-look="calm"][data-mode="dark"] { --bg: #111613; --surface: #1a211d; --text: #e6ece7; --muted: #aab8ae; --line: #2f3a33; --accent: #8fd0b4; --on-accent: #0d241b; --note: #1f2823; --tnote: #1b2028; }
+[data-look="clear"][data-mode="dark"] { --bg: #000; --surface: #000; --text: #fff; --muted: #d0d0d0; --line: #8c8c8c; --accent: #ff9aa6; --on-accent: #000; --note: #1a1a1a; --tnote: #111821; --verse-border: 4px solid #fff; }
+[data-mode="dark"] { color-scheme: dark;
+  --m-gold: #4a3d12; --m-blue: #1c3150; --m-green: #1d3a22; --m-rose: #47202a; --m-purple: #33264a; --m-gray: #33312d;
+  --d-gold: #e8c45a; --d-blue: #7fb0ef; --d-green: #7cc98a; --d-rose: #ec8fa1; --d-purple: #b49be0; --d-gray: #b5b0a6; }
+@media (prefers-color-scheme: dark) {
+  [data-look="book"][data-mode="auto"] { --bg: #17150f; --surface: #211e17; --text: #eee8da; --muted: #bdb5a3; --line: #3e392d; --accent: #9fbbe8; --on-accent: #111c30; --note: #2a261d; --tnote: #1e232b; --verse-border: 3px solid #8a7650; }
+  [data-look="calm"][data-mode="auto"] { --bg: #111613; --surface: #1a211d; --text: #e6ece7; --muted: #aab8ae; --line: #2f3a33; --accent: #8fd0b4; --on-accent: #0d241b; --note: #1f2823; --tnote: #1b2028; }
+  [data-look="clear"][data-mode="auto"] { --bg: #000; --surface: #000; --text: #fff; --muted: #d0d0d0; --line: #8c8c8c; --accent: #ff9aa6; --on-accent: #000; --note: #1a1a1a; --tnote: #111821; --verse-border: 4px solid #fff; }
+  [data-mode="auto"] { color-scheme: dark;
+    --m-gold: #4a3d12; --m-blue: #1c3150; --m-green: #1d3a22; --m-rose: #47202a; --m-purple: #33264a; --m-gray: #33312d;
+    --d-gold: #e8c45a; --d-blue: #7fb0ef; --d-green: #7cc98a; --d-rose: #ec8fa1; --d-purple: #b49be0; --d-gray: #b5b0a6; }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { margin: 0; background: #8f8b84; color: var(--text); font: var(--base)/1.6 var(--ui); overflow-wrap: break-word; }
+a { color: var(--accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* The picker above the screens (not part of the design) */
+.picker { max-width: 26rem; margin: 0 auto; padding: 1rem; background: #fff; color: #111; font: 1rem/1.5 var(--sans); }
+.picker h1 { font-size: 1.4rem; margin: 0 0 .5rem; }
+.picker p { margin: 0 0 .75rem; font-size: .95rem; }
+.seg { display: flex; gap: .4rem; margin: 0 0 .6rem; flex-wrap: wrap; }
+.seg button { flex: 1 1 0; min-height: 2.75rem; font: inherit; font-weight: 600; border: 2px solid #333; background: #fff; color: #111; border-radius: 8px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: #111; color: #fff; }
+.look-desc { display: none; }
+[data-look="book"] .look-desc[data-for="book"], [data-look="calm"] .look-desc[data-for="calm"], [data-look="clear"] .look-desc[data-for="clear"] { display: block; }
+.frame-wrap { max-width: 26rem; margin: 1.5rem auto 0; padding: 0 0 .5rem; }
+.frame-title { margin: 0; padding: .5rem 1rem; font: 600 .95rem/1.4 var(--sans); color: #fff; }
+.phone { background: var(--bg); color: var(--text); border-radius: 18px; overflow: clip; box-shadow: 0 6px 24px rgba(0,0,0,.25); position: relative; }
+@media (max-width: 28rem) { .frame-wrap { margin-top: 1rem; } .phone { border-radius: 0; } }
+
+/* ----- the design itself ----- */
+.top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .7rem 1rem; border-bottom: 1px solid var(--line); background: var(--bg); }
+.brand { font: 700 1rem/1.2 var(--head); }
+.toplinks { display: flex; gap: .9rem; font-size: .9rem; }
+.toplinks a { text-decoration: none; padding: .4rem 0; }
+main { padding: 1.1rem 1rem 1.5rem; }
+h1 { font: var(--head-weight) var(--h1)/1.2 var(--head); margin: .2rem 0 1rem; letter-spacing: -.01em; }
+h2 { font: 600 .95rem/1.4 var(--ui); color: var(--muted); margin: 1.6rem 0 .5rem; text-transform: uppercase; letter-spacing: .06em; }
+[data-look="clear"] h2 { text-transform: none; letter-spacing: 0; font-size: 1.1rem; color: var(--text); }
+p { margin: 0 0 1rem; }
+
+.verse { margin: 0 0 1rem; padding: .9rem 1rem; background: var(--surface); border-left: var(--verse-border); border-radius: var(--radius); }
+[data-look="calm"] .verse { box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+[data-look="clear"] .verse { border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.verse blockquote { margin: 0; font: 1.15rem/1.55 var(--scrip); }
+.verse.main blockquote { font-size: 1.35rem; }
+.verse blockquote p { margin: 0; }
+.verse figcaption { margin-top: .45rem; font-size: .85rem; color: var(--muted); }
+.verse.mark-gold { background: var(--m-gold); }
+
+.note { font-size: .95rem; color: var(--muted); background: var(--note); padding: .65rem .85rem; border-radius: var(--radius); border: 1px dashed var(--line); }
+.note strong { color: var(--text); }
+.draft-tag { font: 600 .7rem/1 var(--sans); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); border: 1px solid var(--line); padding: .15rem .35rem; border-radius: 3px; vertical-align: middle; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+
+/* progress map */
+.map { margin: 0 0 .75rem; }
+.map summary { list-style: none; cursor: pointer; padding: .3rem 0; }
+.map summary::-webkit-details-marker { display: none; }
+.part { font-size: .9rem; color: var(--muted); }
+.part::after { content: " ▾"; }
+.segs { display: flex; gap: .25rem; list-style: none; margin: .35rem 0 0; padding: 0; }
+.segs li { flex: 1; height: .3rem; border-radius: 1rem; background: var(--line); }
+.segs li.done { background: var(--accent); }
+.names { margin: .6rem 0 0; padding-left: 1.3rem; font-size: .95rem; color: var(--muted); }
+.names [aria-current] { color: var(--text); font-weight: 700; }
+.chapter-link { font-size: .95rem; }
+
+.ask { margin-top: 1.5rem; }
+.ask label { display: block; font: 650 1.25rem/1.35 var(--head); margin-bottom: .5rem; }
+.cues { font-size: .95rem; color: var(--muted); margin: .25rem 0 .6rem; }
+.cues p { margin: 0; }
+.cues ul { margin: .1rem 0 0; padding-left: 1.2rem; color: var(--text); }
+textarea, input[type="search"] { display: block; width: 100%; font: inherit; color: var(--text); background: var(--surface); border: 2px solid var(--muted); border-radius: var(--radius); padding: .75rem; }
+textarea { min-height: 7rem; resize: vertical; }
+.hint { color: var(--muted); font-size: .92rem; margin: .5rem 0 0; }
+details.more { border-top: 1px solid var(--line); margin-top: 1.25rem; }
+details.more summary { cursor: pointer; color: var(--accent); padding: .75rem 0; font-weight: 600; min-height: 2.75rem; }
+
+/* pinned action bar */
+.bar { position: sticky; bottom: 0; display: flex; gap: .6rem; padding: .7rem 1rem calc(.7rem + env(safe-area-inset-bottom)); background: var(--bg); border-top: 1px solid var(--line); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 2.9rem; padding: .5rem 1rem; font: 600 1rem/1.2 var(--ui); text-decoration: none; color: var(--accent); background: transparent; border: 2px solid var(--accent); border-radius: var(--radius); }
+[data-look="calm"] .btn { border-radius: 999px; }
+.btn.primary { background: var(--accent); color: var(--on-accent); flex: 1; }
+
+/* welcome choices */
+.choices { display: grid; gap: .65rem; }
+.choice { display: flex; flex-direction: column; gap: .15rem; padding: 1rem 1.1rem; text-decoration: none; color: var(--text); background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+.choice strong { font: 700 1.2rem/1.3 var(--head); color: var(--accent); }
+.choice span { font-size: .95rem; color: var(--muted); }
+.choice.primary { border-color: var(--accent); }
+.choice.quiet { background: transparent; }
+[data-look="calm"] .choice { box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+/* Share Jesus: held between two people */
+.together { font-size: 1.1rem; }
+.progress { font-size: .95rem; color: var(--muted); margin: 0; }
+.phrase { min-height: 52vh; display: flex; flex-direction: column; justify-content: center; }
+.phrase p { font: 650 clamp(2.2rem, 10vw, 3.2rem)/1.25 var(--scrip); margin: 0 0 .5rem; }
+.phrase .cite { font: .95rem/1.4 var(--ui); color: var(--muted); }
+.leader-line { color: var(--muted); font-size: .95rem; text-align: center; }
+.next-steps { padding-left: 1.4rem; }
+.next-steps li { margin-bottom: .6rem; }
+
+/* reader */
+.shelf { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 .25rem; }
+.chapter-nav { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.chapter-nav h1 { margin: 0; }
+.chapter-nav .btn { min-height: 2.6rem; padding: .3rem .8rem; font-size: .9rem; }
+.offline { font-size: .85rem; color: var(--muted); margin: .75rem 0 1rem; padding: .5rem .7rem; border: 1px solid var(--line); border-radius: var(--radius); }
+.offline.ok::before { content: "✓ "; }
+.text p { font: 1.2rem/1.75 var(--scrip); margin: 0 0 1rem; text-indent: 1.2em; }
+[data-look="clear"] .text p { text-indent: 0; line-height: 1.7; }
+.vn { font: 700 .62em/1 var(--ui); color: var(--muted); margin-right: .2em; vertical-align: super; }
+.mark { border-radius: 3px; padding: .05em 0; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.mark-gold { background: var(--m-gold); box-shadow: inset 0 -2px 0 var(--d-gold); }
+/* A translators' note marker: a small numbered button, never part of the text's look. */
+.fn { font: 700 .7rem/1 var(--ui); color: var(--accent); background: var(--tnote); border: 1px solid var(--accent); border-radius: 999px; min-width: 1.4rem; height: 1.4rem; margin: 0 .15em; vertical-align: super; cursor: pointer; padding: 0 .3rem; }
+.tnote { font: .9rem/1.5 var(--ui); background: var(--tnote); border-left: 3px solid var(--muted); padding: .6rem .8rem; margin: -.4rem 0 1rem; border-radius: 0 var(--radius) var(--radius) 0; }
+.tnote p { margin: 0; text-indent: 0; font: inherit; }
+.tnote .tnote-label { font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: .2rem; }
+
+/* bookmarks and notes */
+.swatches { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem; }
+.sw { display: flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .4rem .65rem; font: .95rem/1.2 var(--ui); color: var(--text); background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); text-align: left; cursor: pointer; }
+.sw.on { border-color: var(--text); font-weight: 700; }
+.dot { width: 1rem; height: 1rem; border-radius: 50%; flex: none; display: inline-block; }
+.sw-gold .dot, .dot-gold { background: var(--d-gold); } .sw-blue .dot, .dot-blue { background: var(--d-blue); }
+.sw-green .dot, .dot-green { background: var(--d-green); } .sw-rose .dot { background: var(--d-rose); }
+.sw-purple .dot { background: var(--d-purple); } .sw-gray .dot { background: var(--d-gray); }
+/* Your own notes: hand-written feel, clearly not Scripture and not a translators' note. */
+.mynote { background: var(--surface); border: 2px solid var(--accent); border-radius: var(--radius); padding: .75rem .9rem; font: 1rem/1.55 var(--ui); }
+.mynote p { margin: 0; }
+.mynote .mynote-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); margin-bottom: .3rem; }
+.reflink { font-weight: 600; }
+.notelink { font-weight: 600; text-decoration-style: dotted; }
+.backlinks, .notes, .group ul { margin: 0; padding-left: 1.2rem; }
+.backlinks li, .notes li, .group li { padding: .3rem 0; }
+
+.search span { display: block; font-weight: 600; margin-bottom: .35rem; }
+.group { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: .6rem .85rem; margin-bottom: .6rem; }
+.gl { display: flex; align-items: center; gap: .5rem; font-weight: 700; margin: 0 0 .2rem; }
+.backup { background: var(--note); border-radius: var(--radius); padding: .85rem 1rem; }
+.backup .warn { border-left: 3px solid var(--accent); padding-left: .6rem; }
+.row { display: flex; flex-wrap: wrap; gap: .5rem; }
+.row .btn { flex: 1 1 auto; }
+</style></head>
+<body>
+<header class="picker"><h1>Choose a look</h1>
+<p>Mock-ups only: the app itself has not changed. Tap a look, then scroll through the screens. Labels on the Bible and study screens are drafts for the look; their wording will come to you for approval separately. All Scripture here is drawn from the WEB files by code.</p>
+<div class="seg" role="group" aria-label="Look"><button type="button" data-set-look="book" aria-pressed="true">A · Book</button><button type="button" data-set-look="calm" aria-pressed="false">B · Calm</button><button type="button" data-set-look="clear" aria-pressed="false">C · Clear</button></div>
+<div class="seg" role="group" aria-label="Light or dark"><button type="button" data-set-mode="auto" aria-pressed="true">Phone setting</button><button type="button" data-set-mode="light" aria-pressed="false">Light</button><button type="button" data-set-mode="dark" aria-pressed="false">Dark</button></div>
+<p class="look-desc" data-for="book">A · Book: like a well-printed Bible. Warm paper, serif type for headings and Scripture, deep ink blue.</p>
+<p class="look-desc" data-for="calm">B · Calm: light and open. Rounded cards, plain modern headings, serif only for Scripture, a soft green.</p>
+<p class="look-desc" data-for="clear">C · Clear: strong contrast and larger type, for easy reading in any light. Plain type throughout, deep red accent.</p>
+</header>
+<section class="frame-wrap" aria-labelledby="s0"><h2 class="frame-title" id="s0">1. Welcome</h2><div class="phone"><div class="top"><span class="brand">Teach Us to Pray</span><span class="toplinks"><a href="#!">Bible</a><a href="#!">My study</a><a href="#!">About</a></span></div>
+<main><h1>Teach Us to Pray</h1><figure class="verse "><blockquote><p>When he finished praying in a certain place, one of his disciples said to him, “Lord, teach us to pray, just as John also taught his disciples.”</p></blockquote><figcaption>Luke 11:1 · WEB</figcaption></figure><figure class="verse "><blockquote><p>Pray like this: “‘Our Father in heaven,</p></blockquote><figcaption>Matthew 6:9a · WEB</figcaption></figure>
+<h2>How would you like to pray?</h2>
+<div class="choices"><a class="choice primary" href="#!"><strong>Pray by myself</strong><span>A guided prayer in your own words. About 10 minutes.</span></a>
+<a class="choice" href="#!"><strong>Share Jesus</strong><span>Guide someone who is ready to turn to Jesus as they pray in their own words.</span></a>
+<a class="choice quiet" href="#!"><strong>Read the Bible</strong><span>Draft label: the whole WEB, at your own pace.</span></a></div></main></div></section><section class="frame-wrap" aria-labelledby="s1"><h2 class="frame-title" id="s1">2. A prayer question</h2><div class="phone"><div class="top"><span class="brand">Teach Us to Pray</span><span class="toplinks"><a href="#!">Bible</a><a href="#!">My study</a><a href="#!">About</a></span></div>
+<main><details class="map"><summary><span class="part">Step 1 of 7 · Come to the Father</span><ol class="segs" aria-hidden="true"><li class="done"></li><li class=""></li><li class=""></li><li class=""></li><li class=""></li><li class=""></li><li class=""></li></ol></summary><ol class="names"><li aria-current=step>Come to the Father</li><li>Honor his name</li><li>His kingdom and will</li><li>Daily bread</li><li>Forgive us</li><li>Keep us and deliver us</li><li>Close</li></ol></details><h1>Come to the Father</h1><figure class="verse main"><blockquote><p>Pray like this: “‘Our Father in heaven,</p></blockquote><figcaption>Matthew 6:9a · WEB</figcaption></figure>
+<p class="chapter-link"><a href="#!">Read the whole chapter: Matthew 6</a> <span class="draft-tag">draft label</span></p>
+<div class="ask"><label for="m-words">Jesus called God his Father in heaven. Speak to him now. How will you begin?</label>
+<div class="cues"><p>Think about:</p><ul><li>how you are coming to him today</li></ul></div>
+<textarea id="m-words" rows="4" spellcheck="false"></textarea><p class="hint">Write it as you would say it to him. You may leave this blank.</p></div>
+<details class="more"><summary>Also in Scripture today</summary><figure class="verse "><blockquote><p>But you, when you pray, enter into your inner room, and having shut your door, pray to your Father who is in secret; and your Father who sees in secret will reward you openly.</p></blockquote><figcaption>Matthew 6:6 · WEB</figcaption></figure></details>
+</main><div class="bar"><a class="btn" href="#!">Back</a><a class="btn primary" href="#!">Skip this question</a></div></div></section><section class="frame-wrap" aria-labelledby="s2"><h2 class="frame-title" id="s2">3. Share Jesus: one phrase at a time</h2><div class="phone"><div class="top"><span class="brand">Share Jesus</span><span class="toplinks"><a href="#!">Bible</a><a href="#!">My study</a><a href="#!">Leave</a></span></div>
+<main class="together"><p class="progress">Phrase 2 of 3 · Luke 18:13</p>
+<div class="phrase"><p>be merciful to me,</p><p class="cite">Luke 18:13 · WEB</p></div>
+<p class="leader-line">Read this phrase, then let them repeat it.</p></main><div class="bar"><a class="btn" href="#!">Back</a><a class="btn primary" href="#!">Next</a></div></div></section><section class="frame-wrap" aria-labelledby="s3"><h2 class="frame-title" id="s3">4. Share Jesus: after the prayer</h2><div class="phone"><div class="top"><span class="brand">Share Jesus</span><span class="toplinks"><a href="#!">Bible</a><a href="#!">My study</a><a href="#!">Leave</a></span></div>
+<main class="together"><h1>After the prayer</h1><h2>Grace, not the words</h2><figure class="verse "><blockquote><p>for by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not of works, that no one would boast.</p></blockquote><figcaption>Ephesians 2:8-9 · WEB</figcaption></figure><p class="note"><strong>Our note:</strong> What matters is Jesus, not the exact words.</p><details class="more" open><summary>His promises</summary><figure class="verse "><blockquote><p>but cheer up! I have overcome the world.</p></blockquote><figcaption>John 16:33b · WEB</figcaption></figure><figure class="verse "><blockquote><p>My sheep hear my voice, and I know them, and they follow me. I give eternal life to them. They will never perish, and no one will snatch them out of my hand. My Father who has given them to me is greater than all. No one is able to snatch them out of my Father’s hand.</p></blockquote><figcaption>John 10:27-29 · WEB</figcaption></figure></details><details class="more"><summary>When it gets hard</summary></details><details class="more"><summary>When you fail</summary></details><details class="more"><summary>Feelings are not the test</summary></details><h2>Next steps</h2><ol class="next-steps"><li><strong>Be baptized.</strong></li><li><strong>Read the Gospel of John, and pray each day.</strong></li><li><strong>Stay close to other believers.</strong></li><li><strong>When it gets hard, tell the person who prayed with you.</strong></li></ol>
+<p class="note"><strong>Our note:</strong> Follow up with them within a few days.</p></main><div class="bar"><a class="btn" href="#!">Back</a><a class="btn primary" href="#!">Back to the start</a></div></div></section><section class="frame-wrap" aria-labelledby="s4"><h2 class="frame-title" id="s4">5. Chapter reader</h2><div class="phone"><div class="top"><span class="brand">Bible</span><span class="toplinks"><a href="#!">Bible</a><a href="#!">My study</a><a href="#!">About</a></span></div>
+<main class="reader"><p class="shelf">New Testament · The 66 books</p>
+<div class="chapter-nav"><a class="btn" href="#!">Books</a><h1>John 1</h1><a class="btn" href="#!" aria-label="Search">Search</a></div>
+<p class="offline ok">Saved on this device for offline reading.</p>
+<div class="text"><p><span id="v1"><sup class="vn">1</sup>In the beginning was the Word, and the Word was with God, and the Word was God.</span> <span id="v2"><sup class="vn">2</sup>The same was in the beginning with God.</span> <span id="v3"><sup class="vn">3</sup>All things were made through him. Without him, nothing was made that has been made.</span> <span id="v4"><sup class="vn">4</sup>In him was life, and the life was the light of men.</span> <span id="v5"><sup class="vn">5</sup>The light shines in the darkness, and the darkness hasn’t overcome<button class="fn" type="button" aria-label="WEB translators' note on verse 5">1</button> it.</span> </p><aside class="tnote fn-shown"><p class="tnote-label">WEB translators' note · John 1:5</p><p>The word translated “overcome” (κατέλαβεν) can also be translated “comprehended.” It refers to getting a grip on an enemy to defeat him.</p></aside><p><span id="v6"><sup class="vn">6</sup>There came a man sent from God, whose name was John.</span> <span id="v7"><sup class="vn">7</sup>The same came as a witness, that he might testify about the light, that all might believe through him.</span> <span id="v8"><sup class="vn">8</sup>He was not the light, but was sent that he might testify about the light.</span> <span id="v9"><sup class="vn">9</sup>The true light that enlightens everyone was coming into the world.</span> </p><p><span id="v10"><sup class="vn">10</sup>He was in the world, and the world was made through him, and the world didn’t recognize him.</span> <span id="v11"><sup class="vn">11</sup>He came to his own, and those who were his own didn’t receive him.</span> <span id="v12"><sup class="vn">12</sup>But as many as received him, to them he gave the right to become God’s children, to those who believe in his name:</span> <span id="v13"><sup class="vn">13</sup>who were born, not of blood, nor of the will of the flesh, nor of the will of man, but of God.</span> </p><p><span class="mark mark-gold" id="v14"><sup class="vn">14</sup>The Word became flesh and lived among us. We saw his glory, such glory as of the only born<button class="fn" type="button" aria-label="WEB translators' note on verse 14">2</button> Son of the Father, full of grace and truth.</span> <span id="v15"><sup class="vn">15</sup>John testified about him. He cried out, saying, “This was he of whom I said, ‘He who comes after me has surpassed me, for he was before me.’”</span> <span id="v16"><sup class="vn">16</sup>From his fullness we all received grace upon grace.</span> <span id="v17"><sup class="vn">17</sup>For the law was given through Moses. Grace and truth were realized through Jesus Christ.<button class="fn" type="button" aria-label="WEB translators' note on verse 17">3</button></span> <span id="v18"><sup class="vn">18</sup>No one has seen God at any time. The only born<button class="fn" type="button" aria-label="WEB translators' note on verse 18">4</button> Son,<button class="fn" type="button" aria-label="WEB translators' note on verse 18">5</button> who is in the bosom of the Father, has declared him.</span> </p></div>
+<p class="offline">Example of the other state: “John 2 is not on this device yet. Connect to the internet once to read it offline.”</p>
+</main><div class="bar"><a class="btn" href="#!">Previous chapter</a><a class="btn primary" href="#!">John 2</a></div></div></section><section class="frame-wrap" aria-labelledby="s5"><h2 class="frame-title" id="s5">6. A verse with a bookmark and a note</h2><div class="phone"><div class="top"><span class="brand">Bible</span><span class="toplinks"><a href="#!">Bible</a><a href="#!">My study</a><a href="#!">About</a></span></div>
+<main><p class="shelf">New Testament · The 66 books</p><h1>John 1:14</h1>
+<figure class="verse mark-gold"><blockquote><p>The Word became flesh and lived among us. We saw his glory, such glory as of the only born Son of the Father, full of grace and truth.</p></blockquote><figcaption>John 1:14 · WEB</figcaption></figure>
+<h2>Bookmark color</h2><div class="swatches"><button type="button" class="sw sw-gold on" aria-pressed="true"><span class="dot"></span>Promises</button><button type="button" class="sw sw-blue" aria-pressed="false"><span class="dot"></span>Prayer</button><button type="button" class="sw sw-green" aria-pressed="false"><span class="dot"></span>Study later</button><button type="button" class="sw sw-rose" aria-pressed="false"><span class="dot"></span>Name this color</button><button type="button" class="sw sw-purple" aria-pressed="false"><span class="dot"></span>Name this color</button><button type="button" class="sw sw-gray" aria-pressed="false"><span class="dot"></span>Name this color</button></div>
+<h2>My note <span class="draft-tag">sample note</span></h2>
+<div class="mynote"><p class="mynote-label">Your note · saved because you wrote it</p>
+<p>Compare <a href="#!" class="reflink">Genesis 1:1</a> and <a href="#!" class="reflink">1 John 1:1</a>. See also my note <a href="#!" class="notelink">The Word</a>.</p></div>
+<details class="more" open><summary>Genesis 1:1 (tap a reference to read it)</summary><figure class="verse"><blockquote><p>In the beginning, God created the heavens and the earth.</p></blockquote><figcaption>Genesis 1:1 · WEB</figcaption></figure></details>
+<h2>Your notes that mention John 1:14</h2><ul class="backlinks"><li><a href="#!">The Word</a> <span class="muted">(sample)</span></li></ul>
+</main><div class="bar"><a class="btn" href="#!">Back to John 1</a><a class="btn primary" href="#!">Save note</a></div></div></section><section class="frame-wrap" aria-labelledby="s6"><h2 class="frame-title" id="s6">7. My study</h2><div class="phone"><div class="top"><span class="brand">My study</span><span class="toplinks"><a href="#!">Bible</a><a href="#!">My study</a><a href="#!">About</a></span></div>
+<main><h1>My study</h1>
+<label class="search"><span>Search the Bible and my notes</span><input type="search" value="light" spellcheck="false"></label>
+<p class="hint">Searches the whole Bible on this device. Draft label.</p>
+<h2>Bookmarks</h2>
+<div class="group"><p class="gl"><span class="dot dot-gold"></span>Promises</p><ul><li><a href="#!">John 1:14</a></li><li><a href="#!">Philippians 1:6</a></li></ul></div>
+<div class="group"><p class="gl"><span class="dot dot-blue"></span>Prayer</p><ul><li><a href="#!">Matthew 6:9-13</a></li></ul></div>
+<div class="group"><p class="gl"><span class="dot dot-green"></span>Study later</p><ul><li><a href="#!">Hebrews 10:24-25</a></li></ul></div>
+<h2>Notes</h2><ul class="notes"><li><a href="#!">The Word</a><span class="muted"> · John 1:1, John 1:14, Genesis 1:1</span></li></ul>
+<h2>Backup</h2>
+<div class="backup"><p>Your notes and bookmarks are only on this device. To keep them safe or move them to another device, save a backup file.</p>
+<p class="warn"><strong>The backup file contains your notes as readable text.</strong> Take care where you send it.</p>
+<p class="muted">Last backup: never</p>
+<div class="row"><a class="btn primary" href="#!">Save a backup file</a><a class="btn" href="#!">Open a backup</a><a class="btn" href="#!">Export for Obsidian</a></div></div>
+<p class="muted small">All wording on this screen is a draft for the look only.</p></main></div></section>
+<script>
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-set-look], button[data-set-mode]');
+  if (b) {
+    const key = b.dataset.setLook ? 'look' : 'mode';
+    document.documentElement.dataset[key] = b.dataset.setLook || b.dataset.setMode;
+    b.parentElement.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  }
+  if (e.target.closest('a[href="#!"]')) e.preventDefault();
+});
+</script>
+</body></html>

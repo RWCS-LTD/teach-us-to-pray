@@ -74,8 +74,7 @@
     "choose": "How would you like to pray?",
     "byMyself": "Pray by myself",
     "byMyselfHint": "A guided prayer in your own words. About 10 minutes.",
-    "withSomeone": "Share Jesus",
-    "withSomeoneHint": "Guide someone who is ready to turn to Jesus as they pray in their own words.",
+    "shareHint": "Guide someone who is ready to turn to Jesus as they pray in their own words.",
     "whyLink": "Why we pray this way (Matthew 6:5-8)"
   },
   "why": {
@@ -513,7 +512,7 @@
       ]
     }
   ],
-  "lead": {
+  "share": {
     "name": "Share Jesus",
     "start": {
       "name": "Before you begin",
