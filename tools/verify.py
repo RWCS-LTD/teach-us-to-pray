@@ -20,6 +20,9 @@
 10. The Bible study files equal a fresh extraction from the source (tools/build_bible.py,
     which also checks every chapter word for word and every translators' note), and the
     service worker's Bible cache is named after the same version.
+11. The cross-reference files equal a fresh extraction from the CrossWire TSK module
+    (tools/build_tsk.py, given with --tsk-zip), the module's configuration file is kept in
+    sources/, and the service worker's TSK cache is named after the same version.
 """
 import json
 import pathlib
@@ -28,12 +31,18 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SHIPPED_DIRS = ["css", "js", "lang", "scripture", "icons", "bible"]
+SHIPPED_DIRS = ["css", "js", "lang", "scripture", "icons", "bible", "tsk"]
 SHIPPED_FILES = ["index.html", "manifest.webmanifest", "sw.js"]
 BUDGET = 200 * 1024  # raised from 100 KB (Phase 1, Bible study) and 160 KB (Phase 2, My study)
 problems = []
 SHOW_QUOTES = "--quotes" in sys.argv
 ARGS = [a for a in sys.argv[1:] if a != "--quotes"]
+# --tsk-zip path: the downloaded CrossWire TSK.zip, passed to build_tsk.py as --zip
+TSK_ARGS = []
+if "--tsk-zip" in ARGS:
+    k = ARGS.index("--tsk-zip")
+    TSK_ARGS = ["--zip", ARGS[k + 1]]
+    del ARGS[k:k + 2]
 
 
 def strays(t):
@@ -166,7 +175,7 @@ for lang_file in sorted((ROOT / "lang").glob("*.json")):
 
 # 3 and 4
 shipped = [ROOT / f for f in SHIPPED_FILES] + [p for d in SHIPPED_DIRS for p in (ROOT / d).rglob("*") if p.is_file()]
-is_book = lambda p: p.parent.name == "bible" and p.name != "index.json"
+is_book = lambda p: p.parent.name in ("bible", "tsk") and p.name != "index.json"
 core = [p for p in shipped if not is_book(p)]
 books = [p for p in shipped if is_book(p)]
 names = {p.relative_to(ROOT).as_posix() for p in core}
@@ -176,7 +185,7 @@ if names - {"sw.js"} != listed:
     problems.append(f"sw.js file list differs: {sorted((names - {'sw.js'}) ^ listed)}")
 total = sum(p.stat().st_size for p in core)
 print(f"core app: {total / 1024:.1f} KB of {BUDGET // 1024} KB in {len(core)} files")
-print(f"books of the Bible: {sum(p.stat().st_size for p in books) / 1e6:.1f} MB in {len(books)} files")
+print(f"books and cross-references: {sum(p.stat().st_size for p in books) / 1e6:.1f} MB in {len(books)} files")
 if total > BUDGET:
     problems.append("core app over the size budget")
 
@@ -212,6 +221,18 @@ if f"const BIBLE = 'teach-us-to-pray-bible-{version}';" not in sw:
     problems.append(f"sw.js BIBLE cache must be named after the Bible version {version}")
 if f"'teach-us-to-pray-bible-' + IDX.version" not in (ROOT / "js" / "app.js").read_text(encoding="utf-8"):
     problems.append("app.js must name the Bible cache after the Bible version")
+
+# 11
+r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_tsk.py"), "--check", *TSK_ARGS],
+                   capture_output=True, text=True)
+print("cross-references:", (r.stdout or r.stderr).strip()[-300:])
+if r.returncode:
+    problems.append("cross-reference files do not match the TSK module")
+tsk_version = json.loads((ROOT / "tsk" / "index.json").read_text(encoding="utf-8"))["version"]
+if f"const TSK = 'teach-us-to-pray-tsk-{tsk_version}';" not in sw:
+    problems.append(f"sw.js TSK cache must be named after the cross-reference version {tsk_version}")
+if "DistributionLicense=Public Domain" not in (ROOT / "sources" / "crosswire-tsk.conf").read_text(encoding="utf-8"):
+    problems.append("sources/crosswire-tsk.conf must record the module's Public Domain licence")
 
 print("FAILED:\n- " + "\n- ".join(problems) if problems else "ALL CHECKS PASSED")
 sys.exit(1 if problems else 0)

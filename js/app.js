@@ -11,6 +11,7 @@
  * - Share Jesus: words are held in memory only and never stored, whatever that setting is.
  * - Bible study: the last chapter read and the translators' notes setting (localStorage),
  *   and books opened or downloaded (the Cache Storage named after the Bible version).
+ * - Cross-references: each book's file, once opened (the Cache Storage named after the TSK version).
  * - My study: notes and bookmarks the person made (localStorage), and a note being written
  *   (sessionStorage, until it is saved or cancelled).
  */
@@ -36,6 +37,7 @@
   let flash = '';   // one-time status message for the next render
   let prayerDay = null; // the day fixed when the person taps Begin (memory only)
   let IDX;          // bible/index.json: the books, their shelves and sizes
+  let TSKI = null;  // tsk/index.json: the cross-reference files and their sizes
   const BOOKS = new Map(); // books opened this visit, by code
   let refLinks = true;  // Scripture references link to their chapter (not during Share Jesus)
   let visitKept = false; // the words of this visit are safe in sessionStorage
@@ -732,7 +734,8 @@
     const body = h('div');
     const section = h('section', { class: 'offline-section', 'aria-labelledby': 'offline-heading' },
       h('h2', { id: 'offline-heading' }, B().offlineHeading),
-      h('p', null, B().offlineText), body, status);
+      h('p', null, B().offlineText), body, status,
+      !after && TSKI && xrefOfflinePart());
     if (!window.caches) return section;
     savedCount().then((n) => {
       if (n >= IDX.books.length) {
@@ -1067,6 +1070,182 @@
     return chapterView(info, ch, parseInt(c, 10) || null);
   }
 
+  /* ---------- Cross-references: the Treasury of Scripture Knowledge ---------- */
+
+  // tsk/<CODE>.json, made from the CrossWire TSK by tools/build_tsk.py: for each verse, groups of
+  // [heading in the KJV's words or null, references]. A reference is "PSA 33:6", "1JN 4:9-10",
+  // "ISA 13:1-14:32", or "?" + the TSK's own words when it matches no verse with text in the WEB.
+  // Each book's file is kept on the device when first opened, in its own cache (TSK in sw.js).
+  const X = () => L.xref;
+  const XREFS = new Map();
+  const tskCacheName = () => 'teach-us-to-pray-tsk-' + TSKI.version;
+  const tskInfo = (code) => TSKI.books.find((b) => b.code === code);
+  const tskSizes = () => ({
+    download: mb(TSKI.books.reduce((n, b) => n + b.download, 0)),
+    stored: mb(TSKI.books.reduce((n, b) => n + b.size, 0)),
+  });
+  let downloadingTsk = false;
+
+  async function getXrefs(code) {
+    if (XREFS.has(code)) return XREFS.get(code);
+    const url = 'tsk/' + code + '.json';
+    let res = null;
+    try { if (window.caches && await caches.has(tskCacheName())) res = await caches.match(url, { cacheName: tskCacheName() }); } catch (e) { res = null; }
+    if (!res) {
+      res = await fetch(url);
+      if (!res.ok) throw new Error('not found');
+      try { if (window.caches) await (await caches.open(tskCacheName())).put(url, res.clone()); } catch (e) { /* storage full */ }
+    }
+    const data = await res.json();
+    XREFS.set(code, data);
+    return data;
+  }
+
+  async function tskSavedCount() {
+    try {
+      if (!window.caches || !(await caches.has(tskCacheName()))) return 0;
+      const files = new Set((await (await caches.open(tskCacheName())).keys()).map((r) => r.url.split('/').pop()));
+      return TSKI.books.filter((b) => files.has(b.code + '.json')).length;
+    } catch (e) { return 0; }
+  }
+
+  async function keepAllXrefs(status) {
+    if (downloadingTsk) return false;
+    downloadingTsk = true;
+    let ok = true;
+    try {
+      const cache = await caches.open(tskCacheName());
+      const have = new Set((await cache.keys()).map((r) => r.url.split('/').pop()));
+      let n = 0;
+      for (const b of TSKI.books) {
+        const url = 'tsk/' + b.code + '.json';
+        if (!have.has(b.code + '.json')) {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error('download');
+          await cache.put(url, res);
+        }
+        n += 1;
+        status.textContent = fill(X().downloading, { n, total: TSKI.books.length });
+      }
+      try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) { /* ignore */ }
+      status.textContent = X().allHere;
+    } catch (e) {
+      ok = false;
+      status.textContent = B().stopped;
+    }
+    downloadingTsk = false;
+    return ok;
+  }
+
+  // The cross-references part of "Offline reading": a separate download.
+  function xrefOfflinePart() {
+    const status = h('p', { class: 'status', role: 'status' });
+    const body = h('div', { class: 'xref-offline' });
+    if (!window.caches) return null;
+    tskSavedCount().then((n) => {
+      if (n >= TSKI.books.length) {
+        body.replaceChildren(
+          h('p', { class: 'saved-line' }, X().allHere),
+          h('button', { type: 'button', class: 'btn danger', onclick: async () => { await caches.delete(tskCacheName()); XREFS.clear(); render(false); } }, X().remove),
+          status);
+      } else {
+        const keepBtn = h('button', {
+          type: 'button', class: 'btn',
+          onclick: async () => { keepBtn.disabled = true; if (await keepAllXrefs(status)) render(false); else keepBtn.disabled = false; },
+        }, X().keep);
+        body.replaceChildren(keepBtn, h('p', { class: 'hint' }, fill(X().keepSize, tskSizes())), status);
+      }
+    });
+    return body;
+  }
+
+  // "PSA 33:6" -> { code, ch, v1, v2, ch2 } ; label "Psalm 33:6"
+  function parseXref(r) {
+    const m = r.match(/^(\S+) (\d+):(\d+)(?:-(?:(\d+):)?(\d+))?$/);
+    if (!m) return null;
+    const ch = +m[2];
+    const v1 = +m[3];
+    const ch2 = m[4] ? +m[4] : ch;
+    const v2 = m[5] ? +m[5] : v1;
+    return { code: m[1], ch, v1, ch2, v2 };
+  }
+  function xrefLabel(x) {
+    const info = bookInfo(x.code);
+    const name = info.chapterName || info.name;
+    if (x.ch2 !== x.ch) return name + ' ' + x.ch + ':' + x.v1 + '-' + x.ch2 + ':' + x.v2;
+    return name + ' ' + x.ch + ':' + x.v1 + (x.v2 > x.v1 ? '-' + x.v2 : '');
+  }
+
+  // One reference: a button that previews the verse in WEB text, a link for a span of chapters
+  // (too long to preview), or plain text when it matches no verse in the WEB.
+  function xrefItem(r) {
+    if (r[0] === '?') return h('li', { class: 'xref-plain' }, r.slice(1));
+    const x = parseXref(r);
+    if (!x || !bookInfo(x.code)) return h('li', { class: 'xref-plain' }, r);
+    const href = '#/bible/' + x.code + '/' + x.ch + '/' + x.v1;
+    if (x.ch2 !== x.ch) return h('li', null, h('a', { class: 'xref-link', href }, xrefLabel(x)));
+    const li = h('li');
+    const btn = h('button', {
+      type: 'button', class: 'xref', 'aria-expanded': 'false',
+      onclick: async () => {
+        const open = li.querySelector('.xref-preview');
+        if (open) { open.remove(); btn.setAttribute('aria-expanded', 'false'); return; }
+        const box = h('div', { class: 'xref-preview' }, h('p', { class: 'status' }, fill(B().opening, { book: bookInfo(x.code).name })));
+        li.append(box);
+        btn.setAttribute('aria-expanded', 'true');
+        try {
+          const book = await getBook(x.code);
+          const text = versesOf(book).filter((y) => y.ch === x.ch && +String(y.v).split('-')[0] >= x.v1 && +String(y.v).split('-')[0] <= x.v2).map((y) => y.text).join(' ');
+          box.replaceChildren(h('blockquote', null, h('p', null, text)), h('a', { class: 'btn small', href }, X().openChapter));
+        } catch (e) {
+          box.replaceChildren(h('p', { class: 'hint' }, fill(B().notHere, { book: bookInfo(x.code).name })));
+        }
+      },
+    }, xrefLabel(x));
+    li.append(btn);
+    return li;
+  }
+
+  const FIRST_REFS = 5;
+  function xrefGroups(groups) {
+    return groups.map(([heading, refs]) => {
+      const list = h('ul', { class: 'xref-list' }, refs.slice(0, FIRST_REFS).map(xrefItem));
+      const more = refs.length > FIRST_REFS && h('button', {
+        type: 'button', class: 'btn small',
+        onclick: (e) => { refs.slice(FIRST_REFS).forEach((r) => list.append(xrefItem(r))); e.currentTarget.remove(); },
+      }, fill(X().showAll, { n: refs.length }));
+      return h('div', { class: 'xref-group' }, heading && h('p', { class: 'xref-heading' }, heading), list, more);
+    });
+  }
+
+  // The closed "Cross-references" section in a verse panel. It loads the book's file when opened.
+  function xrefSection(info, ch, v) {
+    if (!TSKI || !tskInfo(info.code)) return null;
+    const body = h('div', { class: 'xref-body' });
+    let loaded = false;
+    const section = h('details', {
+      class: 'xref-section',
+      ontoggle: async () => {
+        if (!section.open || loaded) return;
+        loaded = true;
+        body.replaceChildren(h('p', { class: 'status' }, fill(B().opening, { book: info.name })));
+        try {
+          const data = await getXrefs(info.code);
+          const groups = data.verses[ch + ':' + v] || [];
+          body.replaceChildren(...[
+            h('p', { class: 'xref-source' }, X().source),
+            groups.some((g) => g[0]) && h('p', { class: 'hint' }, X().kjv),
+            xrefGroups(groups)].flat().filter(Boolean));
+          section.scrollIntoView({ block: 'nearest' });
+        } catch (e) {
+          loaded = false;
+          body.replaceChildren(h('p', { class: 'hint' }, fill(X().notHere, { book: info.name })));
+        }
+      },
+    }, h('summary', null, X().heading), body);
+    return section;
+  }
+
   /* ---------- My study: bookmarks and notes ---------- */
 
   // Kept in localStorage under STUDY_KEY, on this device only, and only because the person
@@ -1212,10 +1391,13 @@
       h('div', { class: 'actions' }, write),
       mentions.length > 0 && [h('p', { class: 'small-label' }, T().mentions),
         h('ul', { class: 'backlinks' }, mentions.map((n) => h('li', null, h('a', { href: '#/study/note/' + n.id }, noteName(n)))))],
+      xrefSection(info, ch, v),
       close);
     (btn.closest('p') || btn).after(aside);
     btn.setAttribute('aria-expanded', 'true');
-    through.focus();
+    through.focus({ preventScroll: true });
+    // Keep the whole panel in view, clear of the pinned Back/Next bar (scroll-margin in app.css).
+    aside.scrollIntoView({ block: 'nearest' });
   }
 
   // Writing or editing a note. Saved only when "Save note" is tapped; until then it is kept
@@ -1529,6 +1711,7 @@
     L = await (await fetch('lang/' + lang + '.json')).json();
     S = await (await fetch(L.meta.scriptureFile)).json();
     IDX = await (await fetch('bible/index.json')).json();
+    try { TSKI = await (await fetch('tsk/index.json')).json(); } catch (e) { TSKI = null; }
     STUDY = loadStudy();
 
     document.documentElement.lang = L.meta.lang;
@@ -1565,7 +1748,7 @@
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         // Never reload while there are words on the screen that are not kept anywhere.
         // Pray by myself words survive a reload in sessionStorage; Share Jesus words would not.
-        if (!hadWorker || reloaded || downloading || prayerParts(SHARE).length || (!visitKept && !keep && anyWords())) return;
+        if (!hadWorker || reloaded || downloading || downloadingTsk || prayerParts(SHARE).length || (!visitKept && !keep && anyWords())) return;
         reloaded = true;
         location.reload();
       });

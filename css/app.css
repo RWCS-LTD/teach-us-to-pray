@@ -305,7 +305,27 @@ button.vn:hover, button.vn[aria-expanded="true"] { color: var(--on-accent); back
 #note-title { display: block; width: 100%; min-height: 2.9rem; padding: .55rem .75rem; font: inherit; color: var(--text); background: var(--surface); border: 2px solid var(--muted); border-radius: var(--radius); }
 .note-hits { margin-bottom: 1rem; }
 /* Anything focused or opened inside the text stays clear of the pinned Back/Next bar. */
-.text button, .text a, .tnote, .vpanel, .vpanel * { scroll-margin-bottom: 6rem; scroll-margin-top: 1rem; }
+.text button, .text a, .tnote, .vpanel, .vpanel *, .xref-section { scroll-margin-bottom: 6rem; scroll-margin-top: 1rem; }
+
+/* Cross-references (TSK): an outside source, in plain type */
+.xref-section { margin: .5rem 0 .75rem; border-top: 1px solid var(--line); }
+.xref-section > summary { padding: .6rem 0; }
+.xref-source, .text .xref-source { font-size: .85rem; color: var(--muted); }
+.xref-group { margin: 0 0 .75rem; }
+.xref-heading, .text .xref-heading, .vpanel .xref-heading, .text .vpanel .xref-heading { font-weight: 700; font-style: italic; margin: .4rem 0 .2rem; }
+.xref-list { list-style: none; padding: 0; margin: 0 0 .4rem; display: flex; flex-wrap: wrap; gap: .35rem; }
+.xref-list li { max-width: 100%; }
+.xref, .xref-link {
+  display: inline-flex; align-items: center; min-height: 2.5rem; padding: .25rem .7rem; font: 600 .9rem/1.2 var(--sans);
+  color: var(--accent); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; cursor: pointer; text-decoration: none;
+}
+.xref[aria-expanded="true"] { border-color: var(--accent); }
+.xref-plain { display: inline-flex; align-items: center; min-height: 2.5rem; padding: .25rem .5rem; font-size: .9rem; color: var(--muted); }
+.xref-preview { flex-basis: 100%; margin: .4rem 0 .2rem; padding: .6rem .75rem; background: var(--bg); border-left: 3px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; }
+.xref-preview blockquote { margin: 0 0 .5rem; }
+.xref-preview blockquote p, .text .xref-preview blockquote p { font: 1.05rem/1.55 var(--serif); margin: 0; }
+.xref-list li:has(.xref-preview) { flex-basis: 100%; }
+.xref-offline { margin-top: 1rem; }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
