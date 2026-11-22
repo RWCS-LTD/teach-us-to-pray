@@ -1364,7 +1364,11 @@
     if (!window.confirm(T().openConfirm)) return;
     const added = mergeBackup(doc);
     saveStudy();
-    flash = fill(T().added, added);
+    const count = (n, one, many) => (n === 1 ? one : fill(many, { n }));
+    flash = fill(T().added, {
+      notes: count(added.notes, T().notesOne, T().notesMany),
+      bookmarks: count(added.bookmarks, T().bookmarksOne, T().bookmarksMany),
+    });
     render(false);
   }
 
