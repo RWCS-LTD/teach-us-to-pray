@@ -216,7 +216,7 @@
       nodes: [
         h('h1', null, L.why.heading),
         L.why.sections.map((s) => [h('h2', null, s.heading), passage(s.verses)]),
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('a', { class: 'btn', href: '#/' }, L.nav.back),
           h('a', { class: 'btn primary grow', href: '#/guide' }, L.nav.start)),
       ],
@@ -238,8 +238,12 @@
   }
 
   const progressText = (F, n) => L.step.progress.replace('{n}', n).replace('{total}', F.steps.length);
-  const dots = (F, i) => h('ol', { class: 'dots', 'aria-hidden': 'true' },
-    F.steps.map((_, j) => h('li', { class: j <= i ? 'done' : '' })));
+  // Where the person is: a bar of the steps, which opens to show the names of all of them.
+  const stepMap = (F, i, progress) => h('details', { class: 'map' },
+    h('summary', null,
+      h('span', { class: 'progress' }, progress),
+      h('span', { class: 'dots', 'aria-hidden': 'true' }, F.steps.map((_, j) => h('span', { class: j <= i ? 'done' : '' })))),
+    h('ol', { class: 'names' }, F.steps.map((st, j) => h('li', { 'aria-current': j === i ? 'step' : null }, st.name))));
   // Each step keeps the words of its short questions; the step's words are those
   // joined with a space, so the step reads as one paragraph. Nothing is added to them.
   const joined = (F, i) => F.parts[i].filter((t) => t.trim()).join(' ');
@@ -253,7 +257,7 @@
         h('h1', null, g.introHeading),
         passage(g.introVerses),
         paragraphs(g.intro),
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('a', { class: 'btn', href: '#/' }, L.nav.back),
           beginLink(PRAY.q(1, 1), g.begin)),
       ],
@@ -300,8 +304,7 @@
     return {
       title: progress + ': ' + step.name,
       nodes: [
-        h('p', { class: 'progress' }, progress),
-        dots(F, i),
+        stepMap(F, i, progress),
         h('h1', null, step.name),
         step.verses.map((v) => passage(v, 'main')),
         ourNote(step.note),
@@ -313,7 +316,7 @@
           box,
           h('p', { class: 'hint', id: 'words-hint' }, F.hint)),
         F.needHelp && h('p', null, h('a', { href: F.needHelp }, L.share.needHelp)),
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('a', { class: 'btn', href: backHref }, L.nav.back),
           next),
         picks.length > 0 && h('details', null, h('summary', null, L.step.relatedHeading), picks.map((v) => passage(v))),
@@ -335,7 +338,7 @@
         nodes: [
           h('h1', null, s.heading),
           h('p', { class: 'standout' }, s.empty),
-          h('div', { class: 'actions' },
+          h('div', { class: 'actions nav' },
             h('a', { class: 'btn', href: backHref }, L.nav.back),
             h('a', { class: 'btn primary grow', href: F.needHelp }, s.toBorrow)),
         ],
@@ -367,7 +370,7 @@
               onclick: () => { F.borrowed = F.borrowed.filter((x) => x !== r); render(true); },
             }, s.remove + ': ' + refLabel([r])))),
         ],
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('a', { class: 'btn', href: backHref }, L.nav.back),
           h('a', { class: 'btn primary grow', href: F.walk + '1' }, s.toWalk)),
       ],
@@ -394,7 +397,7 @@
         h('div', { class: F.perPhrase ? 'aloud phrase' : 'aloud' }, h('p', null, u.text),
           u.ref && h('p', { class: 'cite' }, cite(u.ref))),
         F.perPhrase && h('p', { class: 'leader-line' }, L.share.walk.leaderLine),
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('a', { class: 'btn', href: idx > 0 ? F.walk + idx : F.review }, L.nav.back),
           h('a', { class: 'btn primary grow', href: lastPart ? F.prayer : F.walk + (idx + 2) },
             lastPart ? F.finish : L.nav.next)),
@@ -493,7 +496,7 @@
         s.verses.map((v) => passage(v)),
         ourNote(s.note),
         h('div', { class: 'ask' }, h('p', { class: 'small-label' }, s.askLabel + ':'), h('p', { class: 'say-aloud' }, s.ask)),
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('a', { class: 'btn', href: '#/' }, L.nav.back),
           h('a', { class: 'btn primary grow', href: '#/share/cost', onclick: () => resetFlow(SHARE) }, s.next)),
       ],
@@ -513,7 +516,7 @@
         ourNote(s.extraNote),
         s.extraVerses.map((v) => passage(v)),
         h('div', { class: 'ask' }, h('p', { class: 'small-label' }, L.share.start.askLabel + ':'), h('p', { class: 'say-aloud' }, s.ask)),
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('a', { class: 'btn', href: '#/share/not-today' }, s.no),
           h('a', { class: 'btn primary grow', href: SHARE.q(1, 1) }, s.yes)),
       ],
@@ -556,7 +559,7 @@
           return h('div', { class: 'borrowed' }, passage([r]),
             h('label', { class: 'check', for: id }, box, h('span', null, s.use + ': ' + refLabel([r]))));
         }),
-        h('div', { class: 'actions' },
+        h('div', { class: 'actions nav' },
           h('button', { type: 'button', class: 'btn', onclick: () => history.back() }, L.nav.back),
           h('a', { class: 'btn primary grow', href: SHARE.review }, s.done)),
       ],
