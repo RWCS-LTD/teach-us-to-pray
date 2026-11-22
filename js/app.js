@@ -21,6 +21,7 @@
   const VISIT_KEY = 'teach-us-to-pray-visit';   // sessionStorage: this visit only
   const PLACE_KEY = 'teach-us-to-pray-place';   // the last chapter read, e.g. "JHN/3"
   const HIDE_NOTES_KEY = 'teach-us-to-pray-hide-notes';
+  const HIDE_SAVED_KEY = 'teach-us-to-pray-hide-saved-line'; // the "Saved on this device" line was closed
 
   let L;            // language strings
   let S;            // scripture document
@@ -237,8 +238,6 @@
           choice('#/guide', w.byMyself, w.byMyselfHint, 'primary', fixDay),
           choice('#/share', L.share.name, w.shareHint, '')),
         h('p', null, h('a', { href: '#/why' }, w.whyLink)),
-        h('h2', null, w.studyHeading),
-        h('div', { class: 'choices' }, choice('#/bible', w.study, w.studyHint, '')),
         draftSection(),
       ],
     };
@@ -914,7 +913,12 @@
         nodes: [
           h('p', { class: 'shelf' }, B().shelves[info.shelf]),
           h('h1', null, chapterTitle(info, ch)),
-          book.saved && h('p', { class: 'saved-line' }, B().saved),
+          // Once closed, the line stays closed on this device. "Not on this device yet" always shows.
+          book.saved && store.get(HIDE_SAVED_KEY) !== '1' && h('p', { class: 'saved-line dismissible' }, B().saved,
+            h('button', {
+              type: 'button', class: 'dismiss', 'aria-label': B().close,
+              onclick: (e) => { store.set(HIDE_SAVED_KEY, '1'); e.currentTarget.parentElement.remove(); main.querySelector('h1').focus(); },
+            }, '×')),
           chapterText(book, chapter),
           h('div', { class: 'actions' },
             h('a', { class: 'btn', href: '#/bible' }, B().books),

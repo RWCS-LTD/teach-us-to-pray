@@ -200,6 +200,9 @@ body.together .verse blockquote { font-size: 1.25rem; }
 .shelf { margin: 0 0 .25rem; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
 .saved-line { color: var(--muted); font-size: .9rem; padding: .45rem .7rem; border: 1px solid var(--line); border-radius: var(--radius); }
 .saved-line::before { content: "✓ "; }
+.saved-line.dismissible { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding-right: .25rem; }
+.dismiss { flex: none; width: 2.75rem; height: 2.75rem; margin: -.4rem 0; font: 1.4rem/1 var(--sans); color: var(--muted); background: none; border: 0; border-radius: 999px; cursor: pointer; }
+.dismiss:hover { background: var(--note); color: var(--text); }
 .offline-section { margin-top: 2rem; padding-top: .25rem; border-top: 1px solid var(--line); }
 
 /* The chapter text: Scripture in serif; verse numbers, notes and headings in plain type */
