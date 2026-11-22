@@ -56,6 +56,7 @@ header.site {
   border-bottom: 1px solid var(--line);
 }
 header.site a { padding: .5rem 0; text-decoration: none; }
+.site-links { display: flex; flex-wrap: wrap; gap: 0 1.1rem; }
 .brand { font-weight: 700; color: var(--text); }
 main { padding-top: 1.25rem; padding-bottom: 2rem; min-height: 70vh; }
 main:focus { outline: none; }
@@ -179,6 +180,60 @@ body.together .verse blockquote { font-size: 1.25rem; }
 .check { display: flex; align-items: flex-start; gap: .6rem; min-height: 2.75rem; padding: .4rem 0; font-weight: 600; }
 .check input { width: 1.4rem; height: 1.4rem; margin: .15rem 0 0; flex: none; accent-color: var(--accent); }
 .status { min-height: 1.6rem; margin: .5rem 0 0; }
+
+/* Bible study */
+.bible-form { margin: 1.25rem 0; }
+.bible-form > label:first-child { display: block; font-weight: 650; font-size: 1.1rem; margin-bottom: .35rem; }
+.bible-form input, .bible-form select {
+  display: block; width: 100%; min-height: 2.9rem; padding: .55rem .75rem; margin-bottom: .6rem;
+  font: inherit; color: var(--text); background: var(--surface); border: 2px solid var(--muted); border-radius: var(--radius);
+}
+.bible-form .small-label { margin-top: .25rem; }
+.bible-form .hint { margin-top: -.25rem; }
+.book-list { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: .4rem; }
+.book-list a, .chapter-grid a {
+  display: flex; align-items: center; min-height: 2.75rem; padding: .4rem .75rem; text-decoration: none; font-weight: 600;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.chapter-grid { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(3.2rem, 1fr)); gap: .4rem; }
+.chapter-grid a { justify-content: center; padding: .4rem; }
+.shelf { margin: 0 0 .25rem; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; }
+.saved-line { color: var(--muted); font-size: .9rem; padding: .45rem .7rem; border: 1px solid var(--line); border-radius: var(--radius); }
+.saved-line::before { content: "✓ "; }
+.offline-section { margin-top: 2rem; padding-top: .25rem; border-top: 1px solid var(--line); }
+
+/* The chapter text: Scripture in serif; verse numbers, notes and headings in plain type */
+.text p { font: 1.2rem/1.75 var(--serif); margin: 0 0 1rem; }
+.text .k-p { text-indent: 1.2em; }
+.text .k-q1, .text .k-q2, .text .k-q3 { margin: 0; padding-left: 1.5em; text-indent: -1em; }
+.text .k-q2 { padding-left: 2.5em; }
+.text .k-q3 { padding-left: 3.5em; }
+.text .k-pi1, .text .k-li1 { padding-left: 1.5em; }
+.text .k-pc { text-align: center; }
+.text .heading { font: 600 1rem/1.5 var(--sans); color: var(--muted); margin: 1.25rem 0 .5rem; }
+.text .k-d { font: italic 1.1rem/1.6 var(--serif); color: var(--text); margin-top: 0; }
+.text .k-is1, .text .k-ms1, .text .k-s1 { font-size: 1.05rem; color: var(--text); }
+.text .gap { height: .9rem; }
+.vn { font: 700 .62em/1 var(--sans); color: var(--muted); margin-right: .2em; vertical-align: super; scroll-margin-top: 30vh; }
+.vn.hit { color: var(--on-accent); background: var(--accent); border-radius: 4px; padding: .1em .3em; }
+/* A translators' note: a numbered circle in the text, opening to a grey box. Never Scripture's look. */
+.fn {
+  font: 700 .72rem/1 var(--sans); color: var(--accent); background: var(--note); cursor: pointer;
+  border: 1px solid var(--accent); border-radius: 999px; min-width: 1.6rem; height: 1.6rem; padding: 0 .3rem;
+  margin: 0 .15em; vertical-align: super; text-indent: 0;
+}
+.fn[aria-expanded="true"] { background: var(--accent); color: var(--on-accent); }
+.tnote { font: .95rem/1.5 var(--sans); background: var(--note); border-left: 3px solid var(--muted); border-radius: 0 var(--radius) var(--radius) 0; padding: .7rem .9rem; margin: -.4rem 0 1rem; }
+.tnote p, .text .tnote p { font: inherit; margin: 0 0 .5rem; text-indent: 0; padding: 0; }
+.tnote .tnote-label, .text .tnote .tnote-label { font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: .25rem; }
+.btn.small { min-height: 2.75rem; padding: .3rem .9rem; font-size: .9rem; }
+.reader-settings { margin: 1.5rem 0 .5rem; padding-top: .5rem; border-top: 1px solid var(--line); }
+.results { padding-left: 1.4rem; }
+.results li { margin-bottom: 1rem; }
+.results a { font-weight: 650; }
+.results p { margin: .2rem 0 0; font: 1.05rem/1.55 var(--serif); }
+mark { background: #f6e7b0; color: inherit; border-radius: 2px; padding: 0 .1em; }
+@media (prefers-color-scheme: dark) { mark { background: #4a3d12; } }
 
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }

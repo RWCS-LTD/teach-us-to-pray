@@ -2,9 +2,14 @@
 
 1. Bundled Scripture equals a fresh extraction from the source.
 2. Every verse reference in every language file exists in its Scripture file.
-3. The service worker lists exactly the files that are shipped.
-4. The shipped files total less than 100 KB.
-5. No shipped file contains the doxology, cookie code, or an outside address to load.
+3. The service worker lists exactly the files that are shipped, except the books of
+   the Bible, which the app keeps on the device when they are opened.
+4. The core app (everything except the books of the Bible) stays small: less than 160 KB.
+   This is a check on ourselves, not a promise made in the app.
+5. No core file contains the doxology, and no code file contains cookie code or an
+   outside address. The page allows requests to its own site only (Content-Security-Policy),
+   and every fetch in the code is to a file of the app. The books of the Bible are
+   shown as published, so Matthew 6:13 there is whole, with the WEB's note.
 6. Every excerpt the app shows has balanced quotation marks once trimmed by the
    same rule as trimQuotes in js/app.js. The one exception is a speech that
    begins partway into an excerpt and runs on past it, plus the excerpts listed in
@@ -12,6 +17,9 @@
 7. The language file never uses a fixed prayer or declares anyone saved (NEVER_SAY).
 9. The route for leading someone has one name everywhere (share.name).
 8. No question in a prayer step invites a bare yes or no.
+10. The Bible study files equal a fresh extraction from the source (tools/build_bible.py,
+    which also checks every chapter word for word and every translators' note), and the
+    service worker's Bible cache is named after the same version.
 """
 import json
 import pathlib
@@ -20,9 +28,9 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SHIPPED_DIRS = ["css", "js", "lang", "scripture", "icons"]
+SHIPPED_DIRS = ["css", "js", "lang", "scripture", "icons", "bible"]
 SHIPPED_FILES = ["index.html", "manifest.webmanifest", "sw.js"]
-BUDGET = 100 * 1024
+BUDGET = 160 * 1024  # raised from 100 KB when Bible study was added (Phase 1)
 problems = []
 SHOW_QUOTES = "--quotes" in sys.argv
 ARGS = [a for a in sys.argv[1:] if a != "--quotes"]
@@ -158,27 +166,52 @@ for lang_file in sorted((ROOT / "lang").glob("*.json")):
 
 # 3 and 4
 shipped = [ROOT / f for f in SHIPPED_FILES] + [p for d in SHIPPED_DIRS for p in (ROOT / d).rglob("*") if p.is_file()]
-names = {p.relative_to(ROOT).as_posix() for p in shipped}
-listed = set(re.findall(r"'([^']+\.[a-z]+)'", (ROOT / "sw.js").read_text(encoding="utf-8")))
+is_book = lambda p: p.parent.name == "bible" and p.name != "index.json"
+core = [p for p in shipped if not is_book(p)]
+books = [p for p in shipped if is_book(p)]
+names = {p.relative_to(ROOT).as_posix() for p in core}
+sw = (ROOT / "sw.js").read_text(encoding="utf-8")
+listed = set(re.findall(r"^  '([^']+\.[a-z]+)',$", sw, re.M))
 if names - {"sw.js"} != listed:
     problems.append(f"sw.js file list differs: {sorted((names - {'sw.js'}) ^ listed)}")
-total = sum(p.stat().st_size for p in shipped)
-print(f"size: {total / 1024:.1f} KB of {BUDGET // 1024} KB in {len(shipped)} files")
+total = sum(p.stat().st_size for p in core)
+print(f"core app: {total / 1024:.1f} KB of {BUDGET // 1024} KB in {len(core)} files")
+print(f"books of the Bible: {sum(p.stat().st_size for p in books) / 1e6:.1f} MB in {len(books)} files")
 if total > BUDGET:
-    problems.append("over the size budget")
+    problems.append("core app over the size budget")
 
 # 5
 for p in shipped:
     if p.suffix == ".png":
         continue
     text = p.read_text(encoding="utf-8")
-    if "For yours is the Kingdom" in text:
+    if not is_book(p) and "For yours is the Kingdom" in text:
         problems.append(f"doxology found in {p.name}")
     if p.suffix in (".js", ".html", ".css"):
         if "document.cookie" in text:
             problems.append(f"cookie code in {p.name}")
-        if re.search(r"https?://", text):
+        if re.search(r"https?://|//[a-z0-9-]+\.[a-z]", text, re.I):
             problems.append(f"outside address in {p.name}")
+        for target in re.findall(r"fetch\(([^)]*)\)", text):
+            # Allowed: a quoted app path, the Bible book path built in getBook and keepWholeBible
+            # (`url`, always 'bible/' + a book code), the Scripture file named in the language file,
+            # and, in the service worker, the page's own request (the page only makes same-site requests).
+            if not re.match(r"\s*('[a-z]+/|url$|L\.meta\.scriptureFile$|event\.request$)", target):
+                problems.append(f"{p.name}: fetch of something that is not an app file: {target}")
+if "default-src 'self'" not in (ROOT / "index.html").read_text(encoding="utf-8"):
+    problems.append("index.html must keep its Content-Security-Policy (requests to its own site only)")
+
+# 10
+r = subprocess.run([sys.executable, str(ROOT / "tools" / "build_bible.py"), "--check", *ARGS],
+                   capture_output=True, text=True)
+print("bible:", (r.stdout or r.stderr).strip())
+if r.returncode:
+    problems.append("Bible study files do not match source")
+version = json.loads((ROOT / "bible" / "index.json").read_text(encoding="utf-8"))["version"]
+if f"const BIBLE = 'teach-us-to-pray-bible-{version}';" not in sw:
+    problems.append(f"sw.js BIBLE cache must be named after the Bible version {version}")
+if f"'teach-us-to-pray-bible-' + IDX.version" not in (ROOT / "js" / "app.js").read_text(encoding="utf-8"):
+    problems.append("app.js must name the Bible cache after the Bible version")
 
 print("FAILED:\n- " + "\n- ".join(problems) if problems else "ALL CHECKS PASSED")
 sys.exit(1 if problems else 0)
