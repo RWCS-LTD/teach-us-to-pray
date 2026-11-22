@@ -673,17 +673,17 @@
     "heading": "About and privacy",
     "whoHeading": "Why this exists",
     "who": [
-      "This app exists only to serve the ministry of Jesus, the Son of God. It shows how he taught us to pray, so that you can pray in your own words.",
+      "This app exists only to serve the ministry of Jesus, the Son of God. It shows how he taught us to pray, so that you can pray in your own words. It helps a believer guide someone who is ready to turn to Jesus to pray in their own words. And it lets anyone read and study the whole Bible at their own pace.",
       "It is free. There are no ads, no accounts, no donations and no tracking."
     ],
     "privacyHeading": "Privacy",
     "privacy": [
-      "The app never sends anything about you. It has no accounts, cookies or analytics, and it uses no other website. The only things it downloads are its own files, including each book of the Bible the first time you open it, from the same place the app comes from.",
+      "The app never sends anything about you. It has no accounts, cookies or analytics, and it uses no other website. The only things it downloads are its own files, including each book of the Bible the first time you open it, and each book's cross-references the first time you open them, from the same place the app comes from.",
       "The website that hosts the app can see which books and cross-reference files are opened, as with any website. It cannot see your notes or prayers.",
       "Your words leave the app only if you choose to send them yourself. \"Copy\" puts them on your clipboard. \"Share\" hands them to the app you pick on your own device. \"Save as a file\" puts a text file in your downloads. \"Print\" sends them to your printer.",
-      "Nothing is kept in the app after you close it unless you turn on \"Keep my draft on this device\". If you do, your words are stored only in this browser, and \"Erase my words\" removes them. Erasing does not remove files you saved or copies you shared.",
+      "Your prayer words are not kept after you close the app unless you turn on \"Keep my draft on this device\". If you do, your words are stored only in this browser, and \"Erase my words\" removes them. Erasing does not remove files you saved or copies you shared.",
       "While you pray by yourself, your words are also kept for this visit only, in this browser tab, so that they are not lost if you open a chapter of the Bible or your phone closes the tab in the background. They are erased when you close the tab. Nothing is kept beyond the visit unless you turn on \"Keep my draft on this device\". Words typed in \"Share Jesus\" are never stored.",
-      "Bible study remembers the last chapter you read, on this device only, so you can carry on where you left off. Books you open are kept on this device so you can read them offline. Neither is ever sent anywhere.",
+      "Bible study remembers the last chapter you read and a few display choices, such as hiding the translators' notes, on this device only, so you can carry on where you left off. Books you open are kept on this device so you can read them offline. Neither is ever sent anywhere.",
       "My study keeps your notes and bookmarks in this browser on this device only, and only because you wrote them. They are never sent anywhere. A backup file contains your notes as readable text, so take care where you send it.",
       "While you write a note, it is kept for this visit only, in this browser tab, so that it is not lost if your phone closes the tab in the background. It is erased when you save or cancel the note, or close the tab."
     ],
@@ -695,14 +695,14 @@
       "Where an excerpt begins or ends partway through a speech, the quotation mark that opens or closes that speech elsewhere is not shown at the start or end of the excerpt.",
       "The app adds no teaching of its own. The only words that are ours are the step names, headings and buttons, the questions, the short \"Think about\" prompts under them, the start screen, the instruction on the read-through screen, the reminders to pray out loud, and this page. In \"Share Jesus\", the leader notes, the questions and ideas, the instructions on the read-through and phrase screens, and the next steps are ours too. In Bible study, the headings, buttons and the short lines under the Apocrypha shelf are ours, and so are the labels and buttons in My study and the labels around the cross-references.",
       "The text, book names and translators' notes in Bible study come from the same eBible.org files, by code, unchanged. Whole chapters are shown exactly as published. The translators' notes are marked as theirs and are not Scripture. The WEB's preface and glossary are not included.",
-      "Cross-references are from the Treasury of Scripture Knowledge, in the CrossWire Bible Society's edition (version 1.4) dated about 1880, compiled from the work of Canne, Browne, Blayney, Scott and others. It is in the public domain. Its headings are in the words of the King James Version. A reference that does not match a verse in the WEB is shown as plain text."
+      "Cross-references are from the Treasury of Scripture Knowledge, in the CrossWire Bible Society's edition (version 1.4) dated about 1880, compiled from the work of Canne, Browne, Blayney, Scott and others. It is in the public domain. Its headings are in the words of the King James Version. A reference that does not match a verse in the WEB is shown as plain text. One exception: the TSK's references to Romans 16:25-27 open Romans 14:24-26, where the WEB prints those verses, as the WEB's own note says."
     ],
     "doxologyHeading": "Matthew 6:13",
     "doxology": "The World English Bible prints one more sentence at the end of Matthew 6:13, with a footnote that some Greek texts omit it. The guided prayer does not show that sentence. Bible study shows Matthew 6 exactly as the WEB publishes it, with that footnote.",
     "licenseHeading": "License",
-    "license": "The code is released under the MIT License. The Scripture text is public domain.",
+    "license": "The code is released under the MIT License. The Scripture text and the cross-references are in the public domain.",
     "sourceCodeLabel": "Source code",
-    "sourceCodeUrl": "",
+    "sourceCodeUrl": "https://github.com/learntopray/learntopray.github.io",
     "installHeading": "Add the app to your home screen",
     "install": [
       "The app can sit on your home screen like any other app. It then opens in one tap, works offline, and your phone is less likely to erase your notes and bookmarks.",
@@ -717,7 +717,8 @@
       "Before you pray, you read your whole prayer through in one place and change anything that is not true or does not sound like you. Then you pray it out loud, one part at a time.",
       "At the end you see your prayer in your own words. The app never writes a prayer for you, and it never changes your words.",
       "\"Share Jesus\" helps a believer guide someone who is ready to turn to Jesus. It shows Scripture, asks a few questions, and ends with a prayer in that person's own words, said aloud phrase by phrase. The app never writes the prayer, never says that saying it saves anyone, and never keeps their words on the device.",
-      "Bible study has the whole World English Bible, with the Apocrypha on its own shelf. You can go to any chapter, search, and read offline. Each chapter has its own link, so you can open the same place on another device."
+      "Bible study has the whole World English Bible, with the Apocrypha on its own shelf. You can go to any chapter, search, and read offline. Each chapter has its own link, so you can open the same place on another device.",
+      "My study lets you bookmark verses in six colours you can name, write notes that link to passages and to each other, and save a backup file. Under any verse in the 66 books, you can open cross-references from the Treasury of Scripture Knowledge."
     ]
   },
   "bible": {
