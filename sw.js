@@ -6,7 +6,7 @@
  * its own cache, BIBLE, the first time it is opened. BIBLE is named after the
  * version in bible/index.json (tools/verify.py checks they match), so books kept on
  * a phone survive app updates and are replaced only when the Bible files change. */
-const CACHE = 'teach-us-to-pray-v10';
+const CACHE = 'teach-us-to-pray-v12';
 const BIBLE = 'teach-us-to-pray-bible-8679a735ef';
 const FILES = [
   './',

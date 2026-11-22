@@ -4,7 +4,7 @@
 2. Every verse reference in every language file exists in its Scripture file.
 3. The service worker lists exactly the files that are shipped, except the books of
    the Bible, which the app keeps on the device when they are opened.
-4. The core app (everything except the books of the Bible) stays small: less than 160 KB.
+4. The core app (everything except the books of the Bible) stays small: less than 200 KB.
    This is a check on ourselves, not a promise made in the app.
 5. No core file contains the doxology, and no code file contains cookie code or an
    outside address. The page allows requests to its own site only (Content-Security-Policy),
@@ -30,7 +30,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SHIPPED_DIRS = ["css", "js", "lang", "scripture", "icons", "bible"]
 SHIPPED_FILES = ["index.html", "manifest.webmanifest", "sw.js"]
-BUDGET = 160 * 1024  # raised from 100 KB when Bible study was added (Phase 1)
+BUDGET = 200 * 1024  # raised from 100 KB (Phase 1, Bible study) and 160 KB (Phase 2, My study)
 problems = []
 SHOW_QUOTES = "--quotes" in sys.argv
 ARGS = [a for a in sys.argv[1:] if a != "--quotes"]

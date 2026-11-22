@@ -11,6 +11,8 @@
  * - Share Jesus: words are held in memory only and never stored, whatever that setting is.
  * - Bible study: the last chapter read and the translators' notes setting (localStorage),
  *   and books opened or downloaded (the Cache Storage named after the Bible version).
+ * - My study: notes and bookmarks the person made (localStorage), and a note being written
+ *   (sessionStorage, until it is saved or cancelled).
  */
 (() => {
   'use strict';
@@ -22,6 +24,9 @@
   const PLACE_KEY = 'teach-us-to-pray-place';   // the last chapter read, e.g. "JHN/3"
   const HIDE_NOTES_KEY = 'teach-us-to-pray-hide-notes';
   const HIDE_SAVED_KEY = 'teach-us-to-pray-hide-saved-line'; // the "Saved on this device" line was closed
+  const HIDE_TIP_KEY = 'teach-us-to-pray-hide-verse-tip';     // the "Tap a verse number" line was closed
+  const STUDY_KEY = 'teach-us-to-pray-study';                 // My study: notes and bookmarks
+  const NOTE_DRAFT_KEY = 'teach-us-to-pray-note-draft';       // sessionStorage: a note not yet saved
 
   let L;            // language strings
   let S;            // scripture document
@@ -626,6 +631,7 @@
         h('h1', null, a.heading),
         h('h2', null, a.whoHeading), paragraphs(a.who),
         h('h2', null, a.howHeading), paragraphs(a.how),
+        h('h2', { id: 'install' }, a.installHeading), paragraphs(a.install),
         h('h2', null, a.privacyHeading), paragraphs(a.privacy),
         h('h2', null, a.sourcesHeading), paragraphs(a.sources),
         h('h2', null, a.doxologyHeading), h('p', null, a.doxology),
@@ -799,8 +805,10 @@
       title: B().heading,
       nodes: [
         h('h1', null, B().heading),
-        placeBook && h('p', null, h('a', { class: 'btn primary', href: '#/bible/' + pCode + '/' + pCh },
-          fill(B().continue, { ref: chapterTitle(placeBook, pCh) }))),
+        h('div', { class: 'actions' },
+          placeBook && h('a', { class: 'btn primary', href: '#/bible/' + pCode + '/' + pCh },
+            fill(B().continue, { ref: chapterTitle(placeBook, pCh) })),
+          h('a', { class: 'btn', href: '#/study' }, T().myStudy)),
         h('form', {
           class: 'bible-form',
           onsubmit: (e) => {
@@ -870,26 +878,48 @@
 
   const HEADING_KINDS = new Set(['d', 's', 's1', 's2', 'ms', 'ms1', 'ms2', 'mr', 'sp', 'is', 'is1']);
 
+  // The words of each verse sit in a span (data-v), so bookmarks can tint them. A verse number
+  // is a button that opens the verse's panel for bookmarks and notes.
   function chapterText(book, chapter) {
     const showNotes = store.get(HIDE_NOTES_KEY) !== '1';
+    const info = bookInfo(book.code);
     const wrap = h('div', { class: 'text' });
+    const numbers = [];
     let n = 0;
     let verse = null;
+    let first = null;
     for (const [kind, ...tokens] of chapter.b) {
       if (kind === 'b') { wrap.append(h('div', { class: 'gap', 'aria-hidden': 'true' })); continue; }
-      const para = h('p', { class: 'k-' + kind + (HEADING_KINDS.has(kind) ? ' heading' : '') });
+      const heading = HEADING_KINDS.has(kind);
+      const para = h('p', { class: 'k-' + kind + (heading ? ' heading' : '') });
+      let span = null;
+      const into = () => {
+        if (heading || first == null) return para;
+        if (!span) { span = h('span', { class: 'vt', 'data-v': String(first) }); para.append(span); }
+        return span;
+      };
       for (const t of tokens) {
-        if (typeof t === 'string') para.append(t);
+        if (typeof t === 'string') into().append(t);
         else if (typeof t === 'number' || t.v) {
           verse = typeof t === 'number' ? t : t.v;
-          para.append(h('sup', { class: 'vn', id: 'v' + String(verse).split('-')[0] }, String(verse)));
+          first = parseInt(String(verse), 10);
+          numbers.push(first);
+          const v = first;
+          const btn = h('button', {
+            type: 'button', class: 'vn', id: 'v' + v, 'aria-expanded': 'false',
+            'aria-label': fill(T().verseButton, { v: verse }),
+            onclick: () => versePanel(btn, info, chapter.n, v, numbers),
+          }, String(verse));
+          para.append(btn);
+          span = null;
         } else if (t.f != null && showNotes) {
           n += 1;
-          para.append(noteButton(n, chapterTitle(bookInfo(book.code), chapter.n) + (verse ? ':' + verse : ''), t.f, para));
+          into().append(noteButton(n, chapterTitle(info, chapter.n) + (verse ? ':' + verse : ''), t.f, para));
         }
       }
       wrap.append(para);
     }
+    markChapter(wrap, book.code, chapter.n);
     return wrap;
   }
 
@@ -910,6 +940,12 @@
       return {
         title: chapterTitle(info, ch),
         verse,
+        after: () => {
+          const v = reopenVerse;
+          reopenVerse = null;
+          const btn = v && document.getElementById('v' + v);
+          if (btn) btn.click();
+        },
         nodes: [
           h('p', { class: 'shelf' }, B().shelves[info.shelf]),
           h('h1', null, chapterTitle(info, ch)),
@@ -918,6 +954,11 @@
             h('button', {
               type: 'button', class: 'dismiss', 'aria-label': B().close,
               onclick: (e) => { store.set(HIDE_SAVED_KEY, '1'); e.currentTarget.parentElement.remove(); main.querySelector('h1').focus(); },
+            }, '×')),
+          store.get(HIDE_TIP_KEY) !== '1' && h('p', { class: 'tip dismissible' }, T().tip,
+            h('button', {
+              type: 'button', class: 'dismiss', 'aria-label': B().close,
+              onclick: (e) => { store.set(HIDE_TIP_KEY, '1'); e.currentTarget.parentElement.remove(); main.querySelector('h1').focus(); },
             }, '×')),
           chapterText(book, chapter),
           h('div', { class: 'actions' },
@@ -972,8 +1013,12 @@
   function searchView(query, shelf) {
     const q = decodeURIComponent(query || '');
     const books = IDX.books.filter((b) => shelf === 'all' || !B().shelves[shelf] || b.shelf === shelf);
-    const head = [h('h1', null, B().searchLabel), searchForm(q, shelf)];
     const words = q.toLowerCase().replace(/’/g, "'").split(/\s+/).filter(Boolean);
+    const noteHits = words.length ? STUDY.notes.filter((n) => words.every((w) => ((n.title || '') + ' ' + (n.text || '')).toLowerCase().replace(/’/g, "'").includes(w))) : [];
+    const head = [h('h1', null, B().searchLabel), searchForm(q, shelf),
+      noteHits.length > 0 && h('section', { class: 'note-hits' }, h('h2', null, T().inMyNotes),
+        h('ul', { class: 'backlinks' }, noteHits.map((n) => h('li', null, h('a', { href: '#/study/note/' + n.id }, noteName(n)),
+          n.code && h('span', { class: 'muted' }, ' · ' + rangeLabel(n))))))];
     const run = async () => {
       if (window.caches && (await savedCount()) < IDX.books.length) {
         return {
@@ -1022,6 +1067,389 @@
     return chapterView(info, ch, parseInt(c, 10) || null);
   }
 
+  /* ---------- My study: bookmarks and notes ---------- */
+
+  // Kept in localStorage under STUDY_KEY, on this device only, and only because the person
+  // made them. A note being written is kept for the visit in sessionStorage (NOTE_DRAFT_KEY)
+  // until it is saved or cancelled. Nothing from the prayer screens ever becomes a note.
+  const T = () => L.study;
+  const COLORS = ['gold', 'blue', 'green', 'rose', 'purple', 'gray'];
+  let STUDY = null;
+  let reopenVerse = null; // reopen a verse's panel after the chapter is drawn again
+
+  function emptyStudy() { return { app: 'teach-us-to-pray', version: 1, colors: {}, bookmarks: [], notes: [], lastBackup: null }; }
+  function loadStudy() {
+    try {
+      const d = JSON.parse(localStorage.getItem(STUDY_KEY));
+      if (d && Array.isArray(d.notes) && Array.isArray(d.bookmarks)) return Object.assign(emptyStudy(), d);
+    } catch (e) { /* storage unavailable */ }
+    return emptyStudy();
+  }
+  function saveStudy() {
+    try { localStorage.setItem(STUDY_KEY, JSON.stringify(STUDY)); return true; } catch (e) { return false; }
+  }
+  const newId = () => Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  const now = () => new Date().toISOString();
+  const colorName = (c) => (STUDY.colors[c] || '').trim() || T().colors[c];
+  const normTitle = (t) => (t || '').trim().toLowerCase();
+
+  const sessionGet = (k) => { try { return JSON.parse(sessionStorage.getItem(k)); } catch (e) { return null; } };
+  const sessionSet = (k, v) => { try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } };
+
+  // "John 3:16" or "John 3:16-18"
+  function rangeLabel(r) {
+    const info = bookInfo(r.code);
+    return (info ? chapterTitle(info, r.ch) : r.code + ' ' + r.ch) + ':' + r.v1 + (r.v2 > r.v1 ? '-' + r.v2 : '');
+  }
+  const rangeHref = (r) => '#/bible/' + r.code + '/' + r.ch + '/' + r.v1;
+  const covers = (r, code, ch, v) => r.code === code && r.ch === ch && v >= r.v1 && v <= (r.v2 || r.v1);
+  function noteName(n) {
+    if ((n.title || '').trim()) return n.title.trim();
+    if (n.code) return fill(T().noteTitleOn, { ref: rangeLabel(n) });
+    const first = (n.text || '').trim().split('\n')[0];
+    return first ? (first.length > 60 ? first.slice(0, 60) + '…' : first) : T().untitled;
+  }
+  const byOrder = (a, b) => IDX.books.findIndex((x) => x.code === a.code) - IDX.books.findIndex((x) => x.code === b.code) || a.ch - b.ch || a.v1 - b.v1;
+
+  // References and [[note titles]] in a note, in the order they appear.
+  // A reference needs a chapter and verse ("Rom 8:28"), or a whole book name and a chapter ("Psalm 23").
+  const LINK = /\[\[([^\]\n]+)\]\]|((?:[1-4] ?)?[A-Z][a-z]+(?: (?:of )?[A-Z][a-z]+)*)\.? (\d{1,3})(?::(\d{1,3})(?: ?[-–] ?(\d{1,3}))?)?/g;
+  function resolveRef(name, ch, v1, v2) {
+    const norm = (t) => t.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const words = name.split(' ');
+    for (let i = 0; i < words.length; i++) {
+      const q = norm(words.slice(i).join(' '));
+      if (!q || /^\d+$/.test(q)) continue;
+      const book = IDX.books.find((b) => norm(b.name) === q || norm(b.chapterName || '') === q || norm(b.code) === q)
+        || (v1 && q.replace(/^\d/, '').length >= 2 && IDX.books.find((b) => norm(b.name).startsWith(q)));
+      if (book && ch >= 1 && ch <= book.chapters) {
+        const start = v1 ? parseInt(v1, 10) : 1;
+        return { code: book.code, ch: parseInt(ch, 10), v1: start, v2: v2 ? Math.max(start, parseInt(v2, 10)) : start, lead: words.slice(0, i).join(' '), whole: !v1 };
+      }
+    }
+    return null;
+  }
+  function scanNote(text, onText, onRef, onTitle) {
+    LINK.lastIndex = 0;
+    let at = 0;
+    let m;
+    while ((m = LINK.exec(text))) {
+      if (m[1] != null) { onText(text.slice(at, m.index)); onTitle(m[1], m[0]); at = LINK.lastIndex; continue; }
+      const ref = resolveRef(m[2], m[3], m[4], m[5]);
+      if (!ref) { LINK.lastIndex = m.index + 1; continue; }
+      const lead = ref.lead ? ref.lead + ' ' : '';
+      onText(text.slice(at, m.index) + lead);
+      onRef(ref, m[0].slice(lead.length));
+      at = LINK.lastIndex;
+    }
+    onText(text.slice(at));
+  }
+  const refsIn = (text) => { const out = []; scanNote(text || '', () => {}, (r) => out.push(r), () => {}); return out; };
+  const titlesIn = (text) => { const out = []; scanNote(text || '', () => {}, () => {}, (t) => out.push(normTitle(t))); return out; };
+  // The newest note with this title, so a [[link]] always opens one note.
+  const noteByTitle = (t) => STUDY.notes.filter((n) => normTitle(n.title) === normTitle(t)).sort((a, b) => (b.updated || '').localeCompare(a.updated || ''))[0];
+
+  // The note's words exactly as typed, with references and [[titles]] made into links.
+  function linkedText(text) {
+    const out = [];
+    scanNote(text,
+      (t) => { if (t) out.push(t); },
+      (r, shown) => out.push(h('a', { class: 'reflink', href: rangeHref(r) }, shown)),
+      (t, shown) => { const n = noteByTitle(t); out.push(n ? h('a', { class: 'notelink', href: '#/study/note/' + n.id }, shown) : shown); });
+    return out;
+  }
+
+  // Bookmarks and notes drawn into a chapter: tint, a hidden "Bookmarked: …" for screen readers,
+  // and a small button after a verse that has a note.
+  function markChapter(wrap, code, ch) {
+    const spans = (v) => [...wrap.querySelectorAll('.vt[data-v="' + v + '"]')];
+    for (const b of STUDY.bookmarks.filter((x) => x.code === code && x.ch === ch)) {
+      for (let v = b.v1; v <= (b.v2 || b.v1); v++) spans(v).forEach((s) => s.classList.add('mark', 'mark-' + b.color));
+      const first = spans(b.v1)[0];
+      if (first) first.prepend(h('span', { class: 'visually-hidden' }, fill(T().bookmarked, { name: colorName(b.color) }) + '. '));
+    }
+    for (const n of STUDY.notes.filter((x) => x.code === code && x.ch === ch)) {
+      const last = spans(n.v2 || n.v1).pop();
+      if (last) last.append(h('a', { class: 'mynote-btn', href: '#/study/note/' + n.id, 'aria-label': fill(T().noteButton, { ref: rangeLabel(n) }) }, '✎'));
+    }
+  }
+
+  // The panel under a verse: bookmark colours, write or edit a note, and notes that mention it.
+  function versePanel(btn, info, ch, v, verseNumbers) {
+    const open = main.querySelector('aside.vpanel');
+    const wasMine = open && open.dataset.v === String(v);
+    if (open) { open.remove(); main.querySelectorAll('.vn[aria-expanded="true"]').forEach((b) => b.setAttribute('aria-expanded', 'false')); }
+    if (wasMine) return;
+    const code = info.code;
+    const mark = STUDY.bookmarks.find((b) => b.code === code && b.ch === ch && b.v1 === v);
+    const note = STUDY.notes.filter((n) => n.code === code && n.ch === ch && n.v1 === v).sort((a, b) => (b.updated || '').localeCompare(a.updated || ''))[0];
+    const later = verseNumbers.filter((x) => x >= v);
+    const through = h('select', { id: 'through' }, later.map((x) => h('option', { value: x }, String(x))));
+    const start = (mark || note || {}).v2 || v;
+    through.value = String(start);
+    const title = h('p', { class: 'vpanel-title' }, rangeLabel({ code, ch, v1: v, v2: start }));
+    const write = h('a', { class: 'btn primary', href: '#' }, note ? T().editNote : T().writeNote);
+    const v2 = () => parseInt(through.value, 10);
+    const setWrite = () => { write.href = note ? '#/study/edit/' + note.id : '#/study/new/' + code + '/' + ch + '/' + v + '/' + v2(); };
+    setWrite();
+    through.addEventListener('change', () => { title.textContent = rangeLabel({ code, ch, v1: v, v2: v2() }); setWrite(); });
+    const redraw = () => { saveStudy(); reopenVerse = v; render(false); };
+    const mentions = STUDY.notes.filter((n) => n.code !== code || n.ch !== ch || n.v1 !== v).filter((n) => refsIn(n.text).some((r) => covers(r, code, ch, v)));
+    const close = h('button', { type: 'button', class: 'btn small', onclick: () => { aside.remove(); btn.setAttribute('aria-expanded', 'false'); btn.focus(); } }, B().close);
+    const aside = h('aside', { class: 'vpanel', 'data-v': String(v), 'aria-label': rangeLabel({ code, ch, v1: v, v2: v }) },
+      title,
+      h('label', { for: 'through', class: 'small-label' }, T().throughVerse), through,
+      h('p', { class: 'small-label' }, T().bookmark),
+      h('div', { class: 'swatches' }, COLORS.map((c) => h('button', {
+        type: 'button', class: 'sw sw-' + c + (mark && mark.color === c ? ' on' : ''), 'aria-pressed': String(!!mark && mark.color === c),
+        onclick: () => {
+          if (mark) Object.assign(mark, { color: c, v2: v2(), updated: now() });
+          else STUDY.bookmarks.push({ id: newId(), code, ch, v1: v, v2: v2(), color: c, updated: now() });
+          redraw();
+        },
+      }, h('span', { class: 'dot', 'aria-hidden': 'true' }), colorName(c)))),
+      mark && h('button', { type: 'button', class: 'btn danger small', onclick: () => { STUDY.bookmarks = STUDY.bookmarks.filter((b) => b !== mark); redraw(); } }, T().removeBookmark),
+      h('div', { class: 'actions' }, write),
+      mentions.length > 0 && [h('p', { class: 'small-label' }, T().mentions),
+        h('ul', { class: 'backlinks' }, mentions.map((n) => h('li', null, h('a', { href: '#/study/note/' + n.id }, noteName(n)))))],
+      close);
+    (btn.closest('p') || btn).after(aside);
+    btn.setAttribute('aria-expanded', 'true');
+    through.focus();
+  }
+
+  // Writing or editing a note. Saved only when "Save note" is tapped; until then it is kept
+  // for this visit in sessionStorage, so a tab the phone closes in the background loses nothing.
+  function noteEditView(target) {
+    const existing = target.id ? STUDY.notes.find((n) => n.id === target.id) : null;
+    if (target.id && !existing) return myStudyView();
+    const range = existing ? (existing.code ? existing : null) : (target.code ? target : null);
+    const key = existing ? 'edit:' + existing.id : 'new:' + (range ? [range.code, range.ch, range.v1, range.v2].join('/') : '');
+    const draft = sessionGet(NOTE_DRAFT_KEY);
+    const mine = draft && draft.key === key ? draft : null;
+    const titleBox = h('input', { type: 'text', id: 'note-title', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'note-title-hint' });
+    const textBox = h('textarea', { id: 'note-text', rows: '8', autocomplete: 'off', spellcheck: 'false', 'aria-describedby': 'note-text-hint' });
+    titleBox.value = mine ? mine.title : existing ? existing.title || '' : '';
+    textBox.value = mine ? mine.text : existing ? existing.text || '' : '';
+    const keepDraft = () => sessionSet(NOTE_DRAFT_KEY, { key, title: titleBox.value, text: textBox.value });
+    titleBox.addEventListener('input', () => { keepDraft(); dupOk = false; });
+    textBox.addEventListener('input', keepDraft);
+    const status = h('p', { class: 'status', role: 'status' });
+    const away = () => (existing ? '#/study/note/' + existing.id : range ? rangeHref(range) : '#/study');
+    let dupOk = false;
+    const save = () => {
+      if (!titleBox.value.trim() && !textBox.value.trim()) { sessionSet(NOTE_DRAFT_KEY, null); location.hash = away(); return; }
+      const clash = normTitle(titleBox.value) && STUDY.notes.some((n) => n !== existing && normTitle(n.title) === normTitle(titleBox.value));
+      if (clash && !dupOk) { dupOk = true; status.textContent = fill(T().dupTitle, { title: titleBox.value.trim() }); return; }
+      const note = existing || Object.assign({ id: newId(), created: now() }, range ? { code: range.code, ch: range.ch, v1: range.v1, v2: range.v2 } : {});
+      Object.assign(note, { title: titleBox.value, text: textBox.value, updated: now() });
+      if (!existing) STUDY.notes.push(note);
+      if (!saveStudy()) { status.textContent = T().saveFailed; return; }
+      sessionSet(NOTE_DRAFT_KEY, null);
+      flash = T().saved;
+      location.hash = '#/study/note/' + note.id;
+    };
+    const heading = range ? fill(T().noteOn, { ref: rangeLabel(range) }) : existing ? noteName(existing) : T().newNote;
+    return {
+      title: heading,
+      nodes: [
+        h('h1', null, heading),
+        h('div', { class: 'ask' },
+          h('label', { for: 'note-title' }, T().titleLabel), titleBox,
+          h('p', { class: 'hint', id: 'note-title-hint' }, T().titleHint)),
+        h('div', { class: 'ask' },
+          h('label', { for: 'note-text' }, T().noteLabel), textBox,
+          h('p', { class: 'hint', id: 'note-text-hint' }, T().noteHint)),
+        status,
+        h('div', { class: 'actions nav' },
+          h('button', { type: 'button', class: 'btn', onclick: () => { sessionSet(NOTE_DRAFT_KEY, null); location.hash = away(); } }, T().cancel),
+          h('button', { type: 'button', class: 'btn primary grow', onclick: save }, T().save)),
+        existing && h('div', { class: 'actions' }, h('button', {
+          type: 'button', class: 'btn danger',
+          onclick: () => {
+            if (!window.confirm(T().deleteConfirm)) return;
+            STUDY.notes = STUDY.notes.filter((n) => n !== existing);
+            saveStudy();
+            sessionSet(NOTE_DRAFT_KEY, null);
+            location.hash = range ? rangeHref(range) : '#/study';
+          },
+        }, T().delete)),
+      ],
+    };
+  }
+
+  function noteView(id) {
+    const note = STUDY.notes.find((n) => n.id === id);
+    if (!note) return myStudyView();
+    const status = h('p', { class: 'status', role: 'status' }, flash);
+    flash = '';
+    const linkers = STUDY.notes.filter((n) => n !== note && normTitle(note.title) && titlesIn(n.text).includes(normTitle(note.title)));
+    const build = (verseText) => ({
+      title: noteName(note),
+      nodes: [
+        status,
+        h('h1', null, noteName(note)),
+        note.copy && h('p', { class: 'badge' }, T().olderCopy),
+        note.code && h('figure', { class: 'verse' },
+          verseText && h('blockquote', null, h('p', null, verseText)),
+          h('figcaption', null, h('a', { href: rangeHref(note) }, rangeLabel(note) + ' · ' + S.abbreviation))),
+        h('div', { class: 'mynote' }, h('p', { class: 'mynote-label' }, T().noteLabel), h('p', { class: 'mynote-text' }, linkedText(note.text || ''))),
+        linkers.length > 0 && [h('h2', null, T().linkedFrom), h('ul', { class: 'backlinks' }, linkers.map((n) => h('li', null, h('a', { href: '#/study/note/' + n.id }, noteName(n)))))],
+        h('div', { class: 'actions nav' },
+          h('a', { class: 'btn', href: note.code ? rangeHref(note) : '#/study' }, note.code ? fill(T().backTo, { ref: chapterTitle(bookInfo(note.code), note.ch) }) : T().myStudy),
+          h('a', { class: 'btn primary grow', href: '#/study/edit/' + note.id }, T().editNote)),
+      ],
+    });
+    if (!note.code) return build(null);
+    // The verse text comes from the Bible files, as everywhere else. Offline and not kept: the reference alone.
+    const later = getBook(note.code).then((book) => build(versesOf(book).filter((x) => covers(note, note.code, x.ch, parseInt(x.v, 10))).map((x) => x.text).join(' ')), () => build(null));
+    later.loading = { title: noteName(note), nodes: [h('h1', null, noteName(note))] };
+    return later;
+  }
+
+  // Backups: a readable text file of everything in My study. Restoring adds only what is new.
+  function backupText() {
+    return JSON.stringify({ app: 'teach-us-to-pray', kind: 'backup', version: 1, saved: now(),
+      colors: STUDY.colors, bookmarks: STUDY.bookmarks, notes: STUDY.notes }, null, 2);
+  }
+  function saveBackup() {
+    const d = new Date();
+    const two = (n) => String(n).padStart(2, '0');
+    const name = T().fileName + '-' + d.getFullYear() + '-' + two(d.getMonth() + 1) + '-' + two(d.getDate()) + '.json';
+    const url = URL.createObjectURL(new Blob([backupText()], { type: 'application/json;charset=utf-8' }));
+    const link = h('a', { href: url, download: name, class: 'offscreen' });
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    STUDY.lastBackup = now();
+    saveStudy();
+  }
+  // Every note and bookmark has an ID, so the same file opened twice adds nothing.
+  // A note changed on both devices is kept twice; the older one is marked as an older copy.
+  function mergeBackup(doc) {
+    const str = (x) => (typeof x === 'string' ? x : '');
+    const int = (x) => (Number.isInteger(x) && x > 0 ? x : null);
+    const cleanRange = (x) => (bookInfo(x.code) && int(x.ch) && int(x.v1) ? { code: x.code, ch: x.ch, v1: x.v1, v2: Math.max(x.v1, int(x.v2) || x.v1) } : {});
+    const same = (a, b) => str(a.title) === str(b.title) && str(a.text) === str(b.text) && a.code === b.code && a.ch === b.ch && a.v1 === b.v1 && a.v2 === b.v2;
+    let notes = 0;
+    let bookmarks = 0;
+    for (const raw of doc.notes) {
+      if (!raw || typeof raw.id !== 'string') continue;
+      const n = Object.assign({ id: raw.id, title: str(raw.title), text: str(raw.text), created: str(raw.created), updated: str(raw.updated) }, cleanRange(raw), raw.copy ? { copy: true } : {});
+      if (STUDY.notes.some((x) => same(x, n))) continue;
+      const mine = STUDY.notes.find((x) => x.id === n.id);
+      if (!mine) { STUDY.notes.push(n); notes += 1; continue; }
+      if (n.updated < mine.updated) STUDY.notes.push(Object.assign(n, { id: newId(), copy: true }));
+      else { Object.assign(mine, { id: newId(), copy: true }); STUDY.notes.push(n); }
+      notes += 1;
+    }
+    for (const raw of doc.bookmarks) {
+      if (!raw || typeof raw.id !== 'string' || !COLORS.includes(raw.color)) continue;
+      const b = Object.assign({ id: raw.id, color: raw.color, updated: str(raw.updated) }, cleanRange(raw));
+      if (!b.code) continue;
+      const mine = STUDY.bookmarks.find((x) => x.id === b.id || (x.code === b.code && x.ch === b.ch && x.v1 === b.v1));
+      if (!mine) { STUDY.bookmarks.push(b); bookmarks += 1; } else if (b.updated > mine.updated) Object.assign(mine, b, { id: mine.id });
+    }
+    for (const c of COLORS) if (!(STUDY.colors[c] || '').trim() && doc.colors && typeof doc.colors[c] === 'string') STUDY.colors[c] = doc.colors[c];
+    return { notes, bookmarks };
+  }
+  async function openBackup(file, status) {
+    let doc = null;
+    try { doc = JSON.parse(await file.text()); } catch (e) { doc = null; }
+    if (!doc || doc.app !== 'teach-us-to-pray' || doc.kind !== 'backup' || !Array.isArray(doc.notes) || !Array.isArray(doc.bookmarks)) {
+      status.textContent = T().notBackup;
+      return;
+    }
+    if (!window.confirm(T().openConfirm)) return;
+    const added = mergeBackup(doc);
+    saveStudy();
+    flash = fill(T().added, added);
+    render(false);
+  }
+
+  function myStudyView() {
+    const status = h('p', { class: 'status', role: 'status' }, flash);
+    flash = '';
+    const search = h('input', { type: 'search', id: 'notes-q', autocomplete: 'off', spellcheck: 'false' });
+    const notes = [...STUDY.notes].sort((a, b) => (b.updated || '').localeCompare(a.updated || ''));
+    const items = notes.map((n) => {
+      const li = h('li', null, h('a', { href: '#/study/note/' + n.id }, noteName(n)),
+        n.code && h('span', { class: 'muted' }, ' · ' + rangeLabel(n)),
+        n.copy && h('span', { class: 'badge' }, T().olderCopy));
+      li.dataset.text = ((n.title || '') + ' ' + (n.text || '')).toLowerCase();
+      return li;
+    });
+    search.addEventListener('input', () => {
+      const words = search.value.toLowerCase().split(/\s+/).filter(Boolean);
+      items.forEach((li) => { li.hidden = !words.every((w) => li.dataset.text.includes(w)); });
+    });
+    const names = COLORS.map((c) => h('input', { type: 'text', id: 'name-' + c, value: colorName(c), 'aria-label': T().colors[c], autocomplete: 'off', spellcheck: 'false' }));
+    const fileInput = h('input', { type: 'file', accept: '.json,application/json', class: 'offscreen', 'aria-hidden': 'true', tabindex: '-1' });
+    const backupStatus = h('p', { class: 'status', role: 'status' });
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) openBackup(fileInput.files[0], backupStatus); fileInput.value = ''; });
+    // "22 November 2026"
+    const longDate = (d) => d.getDate() + ' ' + d.toLocaleDateString(L.meta.lang, { month: 'long' }) + ' ' + d.getFullYear();
+    const last = STUDY.lastBackup ? longDate(new Date(STUDY.lastBackup)) : T().never;
+    const marks = COLORS.map((c) => [c, STUDY.bookmarks.filter((b) => b.color === c).sort(byOrder)]).filter(([, list]) => list.length);
+    return {
+      title: T().myStudy,
+      nodes: [
+        h('h1', null, T().myStudy),
+        status,
+        h('div', { class: 'bible-form' }, h('label', { for: 'notes-q' }, T().searchNotes), search),
+        h('div', { class: 'actions' }, h('a', { class: 'btn primary', href: '#/study/new' }, T().newNote)),
+        h('h2', null, T().bookmarks),
+        marks.length ? marks.map(([c, list]) => h('div', { class: 'group' },
+          h('p', { class: 'gl' }, h('span', { class: 'dot dot-' + c, 'aria-hidden': 'true' }), colorName(c)),
+          h('ul', null, list.map((b) => h('li', null, h('a', { href: rangeHref(b) }, rangeLabel(b)))))))
+          : h('p', { class: 'muted' }, T().noBookmarks),
+        h('details', { class: 'names-form' }, h('summary', null, T().nameColors),
+          h('div', { class: 'name-grid' }, COLORS.map((c, i) => h('div', { class: 'name-row' }, h('span', { class: 'dot dot-' + c, 'aria-hidden': 'true' }), names[i]))),
+          h('button', {
+            type: 'button', class: 'btn',
+            onclick: () => { COLORS.forEach((c, i) => { STUDY.colors[c] = names[i].value.trim() === T().colors[c] ? '' : names[i].value.trim(); }); saveStudy(); render(false); },
+          }, T().saveNames)),
+        h('h2', null, T().notes),
+        items.length ? h('ul', { class: 'notes' }, items) : h('p', { class: 'muted' }, T().noNotes),
+        h('section', { class: 'backup', 'aria-labelledby': 'backup-heading' },
+          h('h2', { id: 'backup-heading' }, T().backupHeading),
+          h('p', null, T().backupText),
+          h('p', { class: 'warn' }, h('strong', null, T().backupWarnStrong), ' ' + T().backupWarn),
+          h('p', { class: 'muted' }, fill(T().lastBackup, { date: last })),
+          h('p', { class: 'hint' }, T().keepSafe),
+          h('div', { class: 'actions' },
+            h('button', { type: 'button', class: 'btn primary', onclick: () => { saveBackup(); render(false); } }, T().saveBackup),
+            h('button', { type: 'button', class: 'btn', onclick: () => fileInput.click() }, T().openBackup)),
+          fileInput, backupStatus,
+          h('div', { class: 'actions' }, h('button', {
+            type: 'button', class: 'btn danger',
+            onclick: () => {
+              if (!window.confirm(T().eraseAllConfirm)) return;
+              STUDY = emptyStudy();
+              saveStudy();
+              sessionSet(NOTE_DRAFT_KEY, null);
+              render(false);
+            },
+          }, T().eraseAll))),
+      ],
+    };
+  }
+
+  // #/study, #/study/note/<id>, #/study/edit/<id>, #/study/new, #/study/new/<CODE>/<ch>/<v1>/<v2>
+  function studyView(sub, a, b, c, d) {
+    if (sub === 'note') return noteView(a);
+    if (sub === 'edit') return noteEditView({ id: a });
+    if (sub === 'new') {
+      const info = a && bookInfo(a);
+      const ch = parseInt(b, 10);
+      const v1 = parseInt(c, 10);
+      if (info && ch >= 1 && ch <= info.chapters && v1 >= 1) return noteEditView({ code: info.code, ch, v1, v2: Math.max(v1, parseInt(d, 10) || v1) });
+      return noteEditView({});
+    }
+    return myStudyView();
+  }
+
   /* ---------- router ---------- */
 
   function questionView(F, a, b) {
@@ -1046,7 +1474,7 @@
   let renderToken = 0;
   function render(moveFocus) {
     const token = ++renderToken;
-    const [name, arg, arg2, arg3] = location.hash.replace(/^#\/?/, '').split('/');
+    const [name, arg, arg2, arg3, arg4, arg5] = location.hash.replace(/^#\/?/, '').split('/');
     // References link to their chapter everywhere except while leading someone in Share Jesus.
     refLinks = name !== 'share';
     let view = null;
@@ -1060,11 +1488,12 @@
     else if (name === 'about') view = aboutView();
     else if (name === 'why') view = whyView();
     else if (name === 'bible') view = bibleView(arg, arg2, arg3);
+    else if (name === 'study') view = studyView(arg, arg2, arg3, arg4, arg5);
     if (!view) view = welcomeView();
 
     // Share Jesus is held between two people, so its text is larger.
     document.body.classList.toggle('together', name === 'share');
-    document.body.classList.toggle('reading', name === 'bible');
+    document.body.classList.toggle('reading', name === 'bible' || name === 'study');
     // A book that is not open yet: show "Opening…" until it is ready.
     if (typeof view.then === 'function') {
       show(view.loading, moveFocus);
@@ -1087,6 +1516,7 @@
       target.classList.add('hit');
       target.scrollIntoView({ block: 'center' });
     }
+    if (view.after) view.after();
   }
 
   async function start() {
@@ -1095,6 +1525,7 @@
     L = await (await fetch('lang/' + lang + '.json')).json();
     S = await (await fetch(L.meta.scriptureFile)).json();
     IDX = await (await fetch('bible/index.json')).json();
+    STUDY = loadStudy();
 
     document.documentElement.lang = L.meta.lang;
     document.documentElement.dir = L.meta.dir;
