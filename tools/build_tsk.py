@@ -12,9 +12,11 @@ book introductions at verse 1, the TSK's explanatory notes (such as "Heb. ..."),
 text the module stores in book or chapter heading slots rather than in a verse.
 
 References are in King James numbering. They match the WEB everywhere except Romans,
-where the WEB prints 16:25-27 as 14:24-26 (see its note there). Nothing is remapped:
-a reference that does not land on a verse with text in the WEB is kept as the TSK
-wrote it and shown as plain text. Run with --unmatched to list them.
+where the WEB prints 16:25-27 as 14:24-26. One explicit rule, taken from the WEB's own
+note at Romans 14:26, maps KJV Romans 16:25-27 to WEB Romans 14:24-26 (decided at content
+review, 2026-11-22); the build stops if that note is ever missing. Nothing else is remapped:
+a reference that does not land on a verse with text in the WEB is kept as the TSK wrote
+it and shown as plain text. Run with --unmatched to list them.
 
 Usage:
     python tools/build_tsk.py --zip path/TSK.zip [--check] [--unmatched]
@@ -42,6 +44,25 @@ ENCODING = "latin-1"
 # Where KJV numbering and the WEB's differ (WEB note at Romans 14:26). Source entries for
 # these KJV verses are not attached to any WEB verse.
 KJV_CHAPTER_VERSES = {("ROM", 14): 23, ("ROM", 16): 27}
+# The one remapping: KJV Romans 16:25-27 is WEB Romans 14:24-26, as the WEB's note there says.
+ROMANS_NOTE = "TR places verses 24-26 after Romans 16:24 as verses 25-27."
+
+
+def check_romans_note():
+    rom = json.loads((BIBLE / "ROM.json").read_text(encoding="utf-8"))
+    notes = [t["f"] for b in rom["chapters"][13]["b"] for t in b[1:] if isinstance(t, dict) and "f" in t]
+    if ROMANS_NOTE not in notes:
+        raise SystemExit("the WEB's note at Romans 14:26 has changed: the Romans rule cannot be applied")
+
+
+def romans_rule(book, ch, v1, v2):
+    """'ROM 16:25-26=ROM 14:24-25' for KJV Romans 16:25-27, else None. Shown as the TSK's
+    reference, previewing the WEB's verses, with a line saying where the WEB has them."""
+    if book == "ROM" and ch == 16 and 25 <= v1 <= v2 <= 27:
+        kjv = f"ROM 16:{v1}" + (f"-{v2}" if v2 > v1 else "")
+        web = f"ROM 14:{v1 - 1}" + (f"-{v2 - 1}" if v2 > v1 else "")
+        return kjv + "=" + web
+    return None
 
 
 def read_module(data):
@@ -230,6 +251,11 @@ def resolve_refs(text, own_code, own_ch, abbr, books):
                 out.append("?" + (prefix if part == m.group(3).split(",")[0].strip() else "") + part)
                 continue
             v1, v2 = int(r.group(1)), int(r.group(2) or r.group(1))
+            mapped = romans_rule(book, ch, v1, v2)
+            if mapped:
+                out.append(mapped)
+                prefix = ""
+                continue
             # A range matches when both ends are verses with text in the WEB (a verse the WEB
             # does not print, inside the range, does not stop it).
             if v2 < v1 or not chap.get(v1) or not chap.get(v2):
@@ -254,6 +280,7 @@ def build(data):
             if m and int(m.group(1)) != ch:
                 raise SystemExit(f"{code} {ch}: summary names chapter {m.group(1)}")
     abbr = book_abbreviations(entries, where)
+    check_romans_note()
     files, unmatched = {}, []
     stats = {"groups": 0, "headings": 0, "refs": 0, "unmatched": 0, "left_out_text": 0, "heading_slots_left_out": 0, "kjv_only_verses": 0}
     per_book = {}
@@ -269,8 +296,11 @@ def build(data):
             stats["left_out_text"] += dropped
             if not groups:
                 continue
-            if not books[code]["chapters"][ch - 1].get(v):
-                stats["kjv_only_verses"] += 1  # e.g. KJV Romans 16:25-27, printed elsewhere in the WEB
+            key = f"{ch}:{v}"
+            if romans_rule(code, ch, v, v):
+                key = romans_rule(code, ch, v, v).split("=")[1].split(" ")[1]  # the TSK's entry for KJV 16:25 sits on WEB 14:24
+            elif not books[code]["chapters"][ch - 1].get(v):
+                stats["kjv_only_verses"] += 1  # a verse the WEB does not print as text
                 continue
             out = []
             for heading, refs in groups:
@@ -287,7 +317,7 @@ def build(data):
                 stats["refs"] += len(resolved)
                 stats["unmatched"] += sum(r.startswith("?") for r in resolved)
                 out.append([heading, resolved])
-            per_book.setdefault(code, {})[f"{ch}:{v}"] = out
+            per_book.setdefault(code, {})[key] = out
     index = []
     for b in [x for x in idx["books"] if x["code"] in per_book]:
         data_b = (json.dumps({"code": b["code"], "verses": per_book[b["code"]]}, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")

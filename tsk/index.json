@@ -2,12 +2,12 @@
  "source": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/TSK.zip",
  "edition": "CrossWire Bible Society, version 1.4",
  "license": "Public Domain",
- "version": "720eff195d",
+ "version": "e0305c51f1",
  "books": [
   {
    "code": "GEN",
-   "size": 229490,
-   "download": 63038
+   "size": 229503,
+   "download": 63044
   },
   {
    "code": "EXO",
@@ -21,13 +21,13 @@
   },
   {
    "code": "NUM",
-   "size": 144658,
-   "download": 40447
+   "size": 144687,
+   "download": 40455
   },
   {
    "code": "DEU",
-   "size": 158053,
-   "download": 44568
+   "size": 158128,
+   "download": 44572
   },
   {
    "code": "JOS",
@@ -91,13 +91,13 @@
   },
   {
    "code": "JOB",
-   "size": 160131,
-   "download": 45658
+   "size": 160186,
+   "download": 45663
   },
   {
    "code": "PSA",
-   "size": 504514,
-   "download": 138921
+   "size": 504544,
+   "download": 138927
   },
   {
    "code": "PRO",
@@ -116,13 +116,13 @@
   },
   {
    "code": "ISA",
-   "size": 326475,
-   "download": 90803
+   "size": 326563,
+   "download": 90833
   },
   {
    "code": "JER",
-   "size": 307545,
-   "download": 84005
+   "size": 307555,
+   "download": 84008
   },
   {
    "code": "LAM",
@@ -131,13 +131,13 @@
   },
   {
    "code": "EZK",
-   "size": 234818,
-   "download": 63379
+   "size": 234828,
+   "download": 63381
   },
   {
    "code": "DAN",
-   "size": 77964,
-   "download": 21788
+   "size": 77990,
+   "download": 21797
   },
   {
    "code": "HOS",
@@ -191,7 +191,7 @@
   },
   {
    "code": "ZEC",
-   "size": 61594,
+   "size": 61604,
    "download": 17776
   },
   {
@@ -201,88 +201,88 @@
   },
   {
    "code": "MAT",
-   "size": 228021,
-   "download": 62918
+   "size": 228138,
+   "download": 62938
   },
   {
    "code": "MRK",
-   "size": 109395,
-   "download": 30814
+   "size": 109418,
+   "download": 30822
   },
   {
    "code": "LUK",
-   "size": 206361,
-   "download": 57311
+   "size": 206371,
+   "download": 57312
   },
   {
    "code": "JHN",
-   "size": 184073,
-   "download": 48798
+   "size": 184112,
+   "download": 48800
   },
   {
    "code": "ACT",
-   "size": 214581,
-   "download": 58843
+   "size": 214646,
+   "download": 58855
   },
   {
    "code": "ROM",
-   "size": 121228,
-   "download": 33367
+   "size": 122857,
+   "download": 33746
   },
   {
    "code": "1CO",
-   "size": 91586,
+   "size": 91658,
    "download": 25377
   },
   {
    "code": "2CO",
-   "size": 68243,
-   "download": 19168
+   "size": 68308,
+   "download": 19177
   },
   {
    "code": "GAL",
-   "size": 40398,
-   "download": 11552
+   "size": 40424,
+   "download": 11561
   },
   {
    "code": "EPH",
-   "size": 52993,
-   "download": 15016
+   "size": 53104,
+   "download": 15025
   },
   {
    "code": "PHP",
-   "size": 34965,
-   "download": 10269
+   "size": 34978,
+   "download": 10271
   },
   {
    "code": "COL",
-   "size": 33275,
-   "download": 9845
+   "size": 33344,
+   "download": 9853
   },
   {
    "code": "1TH",
-   "size": 29897,
-   "download": 8749
+   "size": 29920,
+   "download": 8752
   },
   {
    "code": "2TH",
-   "size": 13927,
-   "download": 4444
+   "size": 13963,
+   "download": 4448
   },
   {
    "code": "1TI",
-   "size": 37831,
-   "download": 11246
+   "size": 37877,
+   "download": 11251
   },
   {
    "code": "2TI",
-   "size": 26813,
-   "download": 8242
+   "size": 26908,
+   "download": 8250
   },
   {
    "code": "TIT",
-   "size": 14547,
-   "download": 4715
+   "size": 14570,
+   "download": 4716
   },
   {
    "code": "PHM",
@@ -291,8 +291,8 @@
   },
   {
    "code": "HEB",
-   "size": 88622,
-   "download": 25213
+   "size": 88632,
+   "download": 25215
   },
   {
    "code": "JAS",
@@ -301,8 +301,8 @@
   },
   {
    "code": "1PE",
-   "size": 38705,
-   "download": 11547
+   "size": 38760,
+   "download": 11552
   },
   {
    "code": "2PE",
@@ -311,8 +311,8 @@
   },
   {
    "code": "1JN",
-   "size": 31239,
-   "download": 8709
+   "size": 31265,
+   "download": 8716
   },
   {
    "code": "2JN",
@@ -326,13 +326,13 @@
   },
   {
    "code": "JUD",
-   "size": 7932,
-   "download": 2843
+   "size": 7961,
+   "download": 2850
   },
   {
    "code": "REV",
-   "size": 104571,
-   "download": 28333
+   "size": 104617,
+   "download": 28338
   }
  ]
 }

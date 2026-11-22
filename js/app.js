@@ -235,8 +235,13 @@
 
   function welcomeView() {
     const w = L.welcome;
+    // Someone who has been reading carries on with one tap.
+    const [pCode, pCh] = (store.get(PLACE_KEY) || '').split('/');
+    const placeBook = pCode && IDX && bookInfo(pCode);
     return {
       nodes: [
+        placeBook && h('p', { class: 'continue-top' }, h('a', { class: 'btn', href: '#/bible/' + pCode + '/' + pCh },
+          fill(B().continue, { ref: chapterTitle(placeBook, pCh) }))),
         h('h1', null, w.heading),
         w.verses.map((r) => passage([r])),
         paragraphs(w.body),
@@ -1075,6 +1080,8 @@
   // tsk/<CODE>.json, made from the CrossWire TSK by tools/build_tsk.py: for each verse, groups of
   // [heading in the KJV's words or null, references]. A reference is "PSA 33:6", "1JN 4:9-10",
   // "ISA 13:1-14:32", or "?" + the TSK's own words when it matches no verse with text in the WEB.
+  // "ROM 16:25=ROM 14:24": the one remapping (KJV Romans 16:25-27 is WEB Romans 14:24-26, as the
+  // WEB's note says). It is labelled as the TSK wrote it and previews the WEB's verses.
   // Each book's file is kept on the device when first opened, in its own cache (TSK in sw.js).
   const X = () => L.xref;
   const XREFS = new Map();
@@ -1180,10 +1187,12 @@
   // (too long to preview), or plain text when it matches no verse in the WEB.
   function xrefItem(r) {
     if (r[0] === '?') return h('li', { class: 'xref-plain' }, r.slice(1));
-    const x = parseXref(r);
+    const [shown, target] = r.split('=');
+    const x = parseXref(target || shown);
+    const label = parseXref(shown);
     if (!x || !bookInfo(x.code)) return h('li', { class: 'xref-plain' }, r);
     const href = '#/bible/' + x.code + '/' + x.ch + '/' + x.v1;
-    if (x.ch2 !== x.ch) return h('li', null, h('a', { class: 'xref-link', href }, xrefLabel(x)));
+    if (x.ch2 !== x.ch) return h('li', null, h('a', { class: 'xref-link', href }, xrefLabel(label)));
     const li = h('li');
     const btn = h('button', {
       type: 'button', class: 'xref', 'aria-expanded': 'false',
@@ -1196,12 +1205,14 @@
         try {
           const book = await getBook(x.code);
           const text = versesOf(book).filter((y) => y.ch === x.ch && +String(y.v).split('-')[0] >= x.v1 && +String(y.v).split('-')[0] <= x.v2).map((y) => y.text).join(' ');
-          box.replaceChildren(h('blockquote', null, h('p', null, text)), h('a', { class: 'btn small', href }, X().openChapter));
+          box.replaceChildren(...[h('blockquote', null, h('p', null, text)),
+            target && h('p', { class: 'hint' }, X().romansLine),
+            h('a', { class: 'btn small', href }, X().openChapter)].filter(Boolean));
         } catch (e) {
           box.replaceChildren(h('p', { class: 'hint' }, fill(B().notHere, { book: bookInfo(x.code).name })));
         }
       },
-    }, xrefLabel(x));
+    }, xrefLabel(label));
     li.append(btn);
     return li;
   }
@@ -1366,7 +1377,7 @@
     const through = h('select', { id: 'through' }, later.map((x) => h('option', { value: x }, String(x))));
     const start = (mark || note || {}).v2 || v;
     through.value = String(start);
-    const title = h('p', { class: 'vpanel-title' }, rangeLabel({ code, ch, v1: v, v2: start }));
+    const title = h('p', { class: 'vpanel-title', tabindex: '-1' }, rangeLabel({ code, ch, v1: v, v2: start }));
     const write = h('a', { class: 'btn primary', href: '#' }, note ? T().editNote : T().writeNote);
     const v2 = () => parseInt(through.value, 10);
     const setWrite = () => { write.href = note ? '#/study/edit/' + note.id : '#/study/new/' + code + '/' + ch + '/' + v + '/' + v2(); };
@@ -1395,7 +1406,8 @@
       close);
     (btn.closest('p') || btn).after(aside);
     btn.setAttribute('aria-expanded', 'true');
-    through.focus({ preventScroll: true });
+    // Focus the title, not the "Through verse" list: focusing a list opens its picker on phones.
+    title.focus({ preventScroll: true });
     // Keep the whole panel in view, clear of the pinned Back/Next bar (scroll-margin in app.css).
     aside.scrollIntoView({ block: 'nearest' });
   }

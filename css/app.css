@@ -304,6 +304,9 @@ button.vn:hover, button.vn[aria-expanded="true"] { color: var(--on-accent); back
 .tip.dismissible { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding-right: .25rem; }
 #note-title { display: block; width: 100%; min-height: 2.9rem; padding: .55rem .75rem; font: inherit; color: var(--text); background: var(--surface); border: 2px solid var(--muted); border-radius: var(--radius); }
 .note-hits { margin-bottom: 1rem; }
+.continue-top { margin: 0 0 1rem; }
+.continue-top .btn { width: 100%; }
+.vpanel-title:focus { outline: none; }
 /* Anything focused or opened inside the text stays clear of the pinned Back/Next bar. */
 .text button, .text a, .tnote, .vpanel, .vpanel *, .xref-section { scroll-margin-bottom: 6rem; scroll-margin-top: 1rem; }
 
